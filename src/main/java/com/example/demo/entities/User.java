@@ -2,6 +2,8 @@ package com.example.demo.entities;
 
 import java.util.List;
 
+import org.springframework.hateoas.RepresentationModel;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,11 +16,11 @@ import jakarta.validation.constraints.Size;
 @Entity
 @Table(name = "usuarios")
 
-public class User {
+public class User extends RepresentationModel<User>{
 
 	@Id
 	@GeneratedValue
-	private long id;
+	private long userId;
 
 	@NotEmpty(message="Username is mandatory")
 	@Column(name = "USER_NAME", length = 50, nullable = false, unique = true)
@@ -46,7 +48,7 @@ public class User {
 
 	public long getId() {
 
-		return id;
+		return userId;
 
 	}
 
@@ -60,7 +62,7 @@ public class User {
 
 	public void setId(long id) {
 
-		this.id = id;
+		this.userId = id;
 
 	}
 
@@ -144,7 +146,7 @@ public class User {
 
 		super();
 
-		this.id = id;
+		this.userId = id;
 
 		this.username = username;
 
@@ -162,7 +164,7 @@ public class User {
 
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", username=" + username + ", firstname=" + firstname + ", lastname=" + lastname
+		return "User [id=" + userId + ", username=" + username + ", firstname=" + firstname + ", lastname=" + lastname
 				+ ", email=" + email + ", role=" + role + ", ssn=" + ssn + ", orders=" + orders + "]";
 	}
 
@@ -170,7 +172,7 @@ public class User {
 			@Size(min = 2, message = "First name should have at least 3 characteres.") String firstname,
 			String lastname, String email, String role, String ssn, List<Order> orders) {
 		super();
-		this.id = id;
+		this.userId = id;
 		this.username = username;
 		this.firstname = firstname;
 		this.lastname = lastname;
