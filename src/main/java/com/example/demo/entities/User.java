@@ -1,9 +1,12 @@
 package com.example.demo.entities;
 
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -37,11 +40,22 @@ public class User {
 
 	@Column(name = "SSN", length = 50, nullable = false, unique = true)
 	private String ssn;
+	
+	@OneToMany(mappedBy = "user")
+	private List<Order> orders;
 
 	public long getId() {
 
 		return id;
 
+	}
+
+	public List<Order> getOrders() {
+		return orders;
+	}
+
+	public void setOrders(List<Order> orders) {
+		this.orders = orders;
 	}
 
 	public void setId(long id) {
@@ -147,13 +161,23 @@ public class User {
 	}
 
 	@Override
-
 	public String toString() {
-
 		return "User [id=" + id + ", username=" + username + ", firstname=" + firstname + ", lastname=" + lastname
+				+ ", email=" + email + ", role=" + role + ", ssn=" + ssn + ", orders=" + orders + "]";
+	}
 
-				+ ", email=" + email + ", role=" + role + ", ssn=" + ssn + "]";
-
+	public User(long id, @NotEmpty(message = "Username is mandatory") String username,
+			@Size(min = 2, message = "First name should have at least 3 characteres.") String firstname,
+			String lastname, String email, String role, String ssn, List<Order> orders) {
+		super();
+		this.id = id;
+		this.username = username;
+		this.firstname = firstname;
+		this.lastname = lastname;
+		this.email = email;
+		this.role = role;
+		this.ssn = ssn;
+		this.orders = orders;
 	}
 
 	// No argument constructor, getters and setters, to string
