@@ -5,41 +5,37 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 
 @Entity
-
 @Table(name = "usuarios")
 
 public class User {
 
 	@Id
-
 	@GeneratedValue
-
 	private long id;
 
+	@NotEmpty(message="Username is mandatory")
 	@Column(name = "USER_NAME", length = 50, nullable = false, unique = true)
-
 	private String username;
-
+	
+	@Size(min=2, message="First name should have at least 3 characteres.")
 	@Column(name = "FIRST_NAME", length = 50, nullable = false)
-
 	private String firstname;
-
+	
 	@Column(name = "LAST_NAME", length = 50, nullable = false)
-
 	private String lastname;
 
+	
 	@Column(name = "EMAIL_ADDRESS", length = 50, nullable = false, unique = true)
-
 	private String email;
 
 	@Column(name = "ROLE", length = 50, nullable = false)
-
 	private String role;
 
 	@Column(name = "SSN", length = 50, nullable = false, unique = true)
-
 	private String ssn;
 
 	public long getId() {
