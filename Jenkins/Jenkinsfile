@@ -1,0 +1,31 @@
+pipeline {
+    agent any
+    tools {
+        maven 'maven-jenkins-installation-3.9.8'//local
+    }
+
+    stages {
+
+        stage('Git Checkout') {
+            steps {
+                   checkout scmGit(
+                        branches: [[name: '*/master']], 
+                        extensions: [], 
+                        userRemoteConfigs: [[url: "https://github.com/ValeriaCalzada/demoRest.git" ]]
+                        )
+                    echo 'Git Checkout Completed'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQServer') {
+                    sh '''
+                        mvn clean verify sonar:sonar -Dsonar.projectKey=DemoProjectSonar -Dsonar.projectName='DemoProjectSonar' -Dsonar.host.url=http://sonar:9000
+                    '''
+                    echo 'SonarQube Analysis Completed'
+                }
+            }
+        }
+    }
+}
