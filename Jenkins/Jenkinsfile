@@ -11,7 +11,7 @@ pipeline {
                    checkout scmGit(
                         branches: [[name: '*/master']], 
                         extensions: [], 
-                        userRemoteConfigs: [[url: "https://github.com/ValeriaCalzada/demoRest.git" ]]
+                        userRemoteConfigs: [[url: "https://github.com/ValeriaCalzada/demoRest.git"]]
                         )
                     echo 'Git Checkout Completed'
             }
