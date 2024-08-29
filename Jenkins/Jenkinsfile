@@ -13,7 +13,7 @@ pipeline {
                         extensions: [], 
                         userRemoteConfigs: [[url: "https://github.com/ValeriaCalzada/demoRest.git"]]
                         )
-                    echo 'Git Checkout Completed'
+                    echo 'Git Checkout Completed!'
             }
         }
 
@@ -23,7 +23,7 @@ pipeline {
                     sh '''
                         mvn clean verify sonar:sonar -Dsonar.projectKey=DemoProjectSonarGithub -Dsonar.projectName='DemoProjectSonarGithub' -Dsonar.host.url=http://sonar:9000
                     '''
-                    echo 'SonarQube Analysis Completed'
+                    echo 'SonarQube Analysis Completed!'
                 }
             }
         }
