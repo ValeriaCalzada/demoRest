@@ -21,7 +21,7 @@ pipeline {
             steps {
                 script {
                     // Use environment variables if they are set
-                    def endpointUrl = "https://pokeapi.co/api/v2/pokemon/${params.pokemon-name}"
+                    def endpointUrl = "https://pokeapi.co/api/v2/pokemon/${params.POKEMON_NAME}"
                     
                     // Call the external endpoint
                     def response = httpRequest url: endpointUrl, validResponseCodes: '200:299'
