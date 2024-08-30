@@ -22,7 +22,6 @@ pipeline {
         stage('Postman CLI Login') {
             steps {
                 withCredentials([string(credentialsId: 'postman-token', tokenVar: 'POSTMAN_API_KEY')]){
-                    sh 'echo $env.POSTMAN_API_KEY'  // To confirm the variable is set, but avoid in production due to security reasons
                     sh 'postman login --with-api-key ${env.POSTMAN_API_KEY}'
                 }
             }
