@@ -21,8 +21,7 @@ pipeline {
         stage('Install Postman CLI') {
             steps {
                 sh '''
-                    apt install sudo
-                    curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+                    sudo curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
                 '''
             }
         }
