@@ -17,6 +17,22 @@ pipeline {
             }
         }
 
+        stage('Call External Endpoint') {
+            steps {
+                script {
+                    // Use environment variables if they are set
+                    def endpointUrl = "https://pokeapi.co/api/v2/pokemon/${params.pokemon-name}"
+                    
+                    // Call the external endpoint
+                    def response = httpRequest url: endpointUrl, validResponseCodes: '200:299'
+
+                    // Process the response
+                    def jsonResponse = readJSON text: response.content
+                    echo "Response from API: ${jsonResponse}"
+                }
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQServer') {
