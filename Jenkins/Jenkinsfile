@@ -18,6 +18,11 @@ pipeline {
             }
         }
 
+        stage('Script execution') {
+            steps {
+                sh '.Jenkins/scripts/call-cds.sh'
+            }
+        }
 
         stage('Postman CLI Login') {
             steps {
@@ -36,13 +41,8 @@ pipeline {
         stage('Call External Endpoint') {
             steps {
                 script {
-                    // Use environment variables if they are set
                     def endpointUrl = "https://pokeapi.co/api/v2/pokemon/${params.POKEMON_NAME}"
-                    
-                    // Call the external endpoint
                     def response = httpRequest url: endpointUrl, validResponseCodes: '200:299'
-
-                    // Process the response
                     def jsonResponse = readJSON text: response.content
                     echo "Response from API: ${jsonResponse}"
                 }
