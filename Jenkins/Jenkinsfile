@@ -20,8 +20,10 @@ pipeline {
 
         stage('Script execution') {
             steps {
-                sh 'chmod +x ./Jenkins/scripts/call-cds.sh'
-                sh './Jenkins/scripts/call-cds.sh'
+                withEnv(["POKEMON_NAME=${params.POKEMON_NAME}"]) {
+                    sh 'chmod +x ./Jenkins/scripts/call-cds.sh'
+                    sh './Jenkins/scripts/call-cds.sh'
+                }
             }
         }
 
