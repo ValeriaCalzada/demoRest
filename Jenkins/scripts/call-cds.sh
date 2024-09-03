@@ -1,10 +1,12 @@
 #!/bin/bash
 
-# Define the URL and the Bearer token
-URL="https://pokeapi.co/api/v2/pokemon/${POKEMON_NAME}"  # Replace with the actual URL
-BEARER_TOKEN="your_bearer_token_here"   # Replace with the actual token
+TOKEN_URL="https://iam-svc.dms.uset2.ficoanalyticcloud.com/openam/oauth2/access_token" 
 
-# Define the data to be sent in the body (URL-encoded format)
-DATA="param1=value1&param2=value2"
+body="client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials&realm=/FicoAnalyticCloud"
 
-echo $URL
+response = $(curl -H "Content-Type: application/x-www-form-urlencoded" \
+        -X POST \
+        -d "$body" \
+        "$TOKEN_URL")
+
+echo $response
