@@ -20,7 +20,7 @@ pipeline {
 
         stage('Script execution') {
             steps {
-                sh '.Jenkins/scripts/call-cds.sh'
+                sh './Jenkins/scripts/call-cds.sh'
             }
         }
 
