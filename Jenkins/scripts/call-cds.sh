@@ -13,3 +13,5 @@ response=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-
         "$TOKEN_URL")
 
 echo $response
+
+ENCODED_TOKEN=$(echo -n "$response.access_token" | base64)
