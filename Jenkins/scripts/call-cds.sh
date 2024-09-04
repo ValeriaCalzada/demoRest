@@ -15,3 +15,7 @@ response=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-
 ENCODED_TOKEN=$(echo -n "$response.access_token" | base64)
 
 echo $ENCODED_TOKEN
+
+curl -H "Authorization: Bearer ${ENCODED_TOKEN}" -H 'Content-Type: application/json' \
+        -X POST \
+        "$CDS_INIT_URL"
