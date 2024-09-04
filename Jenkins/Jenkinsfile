@@ -25,7 +25,7 @@ pipeline {
                         script{
                             sh 'chmod +x ./Jenkins/scripts/call-cds.sh'
                             env.bearer_token=sh([script: "./Jenkins/scripts/call-cds.sh", returnStdout: true]).trim()
-                            sh 'echo $env.bearer_token'
+                            sh "echo ${env.bearer_token}"
                         }
                     }
                 }
