@@ -11,8 +11,8 @@ pipeline {
             stage('Git Checkout') {
                 steps {
                     checkout scmGit(
-                            branches: [[name: '*/master']], 
-                            extensions: [], 
+                            branches: [[name: '*/master']],
+                            extensions: [],
                             userRemoteConfigs: [[url: "https://github.com/ValeriaCalzada/demoRest.git"]]
                             )
                         echo 'Git Checkout Completed'
@@ -25,7 +25,7 @@ pipeline {
                         withCredentials([string(credentialsId: 'client-secret', variable: 'CLIENT_SECRET')]){
                             script{
                                 sh 'chmod +x ./Jenkins/scripts/call-cds.sh'
-                                env.bearer_token=([sh './Jenkins/scripts/call-cds.sh', returnStdout: true]).trim()
+                                env.bearer_token=sh(['./Jenkins/scripts/call-cds.sh', returnStdout: true]).trim()
                                 sh 'echo $env.bearer_token'
                             }
                         }
@@ -44,7 +44,7 @@ pipeline {
             stage('Running collection') {
                 steps {
                     sh 'postman collection run "24464678-797b1e32-ba59-4604-9873-1ea97a2bc9c4"'
-                }  
+                }
             }
 
             stage('Call External Endpoint') {
@@ -73,5 +73,4 @@ pipeline {
         currentBuild.result = "FAILED"
         throw e
     }
-    
 }
