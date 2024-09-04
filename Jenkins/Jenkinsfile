@@ -1,76 +1,71 @@
 pipeline {
-    try{
-        agent any
-        tools {
-            maven 'maven-jenkins-installation-3.9.8'//local
-            nodejs "nodejs-jenkins-installation-22.7.0"
+    agent any
+    tools {
+        maven 'maven-jenkins-installation-3.9.8'//local
+        nodejs "nodejs-jenkins-installation-22.7.0"
+    }
+
+    stages {
+
+        stage('Git Checkout') {
+            steps {
+                checkout scmGit(
+                        branches: [[name: '*/master']],
+                        extensions: [],
+                        userRemoteConfigs: [[url: "https://github.com/ValeriaCalzada/demoRest.git"]]
+                        )
+                    echo 'Git Checkout Completed'
+            }
         }
 
-        stages {
-
-            stage('Git Checkout') {
-                steps {
-                    checkout scmGit(
-                            branches: [[name: '*/master']],
-                            extensions: [],
-                            userRemoteConfigs: [[url: "https://github.com/ValeriaCalzada/demoRest.git"]]
-                            )
-                        echo 'Git Checkout Completed'
-                }
-            }
-
-            stage('Script execution') {
-                steps {
-                    withEnv(["CLIENT_ID=${params.CLIENT_ID}", "SOLUTION_ID=${params.SOLUTION_ID}"]) {
-                        withCredentials([string(credentialsId: 'client-secret', variable: 'CLIENT_SECRET')]){
-                            script{
-                                sh 'chmod +x ./Jenkins/scripts/call-cds.sh'
-                                env.bearer_token=sh([script: "./Jenkins/scripts/call-cds.sh", returnStdout: true]).trim()
-                                sh 'echo $env.bearer_token'
-                            }
+        stage('Script execution') {
+            steps {
+                withEnv(["CLIENT_ID=${params.CLIENT_ID}", "SOLUTION_ID=${params.SOLUTION_ID}"]) {
+                    withCredentials([string(credentialsId: 'client-secret', variable: 'CLIENT_SECRET')]){
+                        script{
+                            sh 'chmod +x ./Jenkins/scripts/call-cds.sh'
+                            env.bearer_token=sh([script: "./Jenkins/scripts/call-cds.sh", returnStdout: true]).trim()
+                            sh 'echo $env.bearer_token'
                         }
                     }
                 }
             }
+        }
 
-            stage('Postman CLI Login') {
-                steps {
-                    withCredentials([string(credentialsId: 'postman-token', variable: 'POSTMAN_API_KEY')]){
-                        sh 'postman login --with-api-key $POSTMAN_API_KEY'
-                    }
-                }
-            }
-
-            stage('Running collection') {
-                steps {
-                    sh 'postman collection run "24464678-797b1e32-ba59-4604-9873-1ea97a2bc9c4"'
-                }
-            }
-
-            stage('Call External Endpoint') {
-                steps {
-                    script {
-                        def endpointUrl = "https://pokeapi.co/api/v2/pokemon/${params.POKEMON_NAME}"
-                        def response = httpRequest url: endpointUrl, validResponseCodes: '200:299'
-                        def jsonResponse = readJSON text: response.content
-                        echo "Response from API: ${jsonResponse}"
-                    }
-                }
-            }
-
-            stage('SonarQube Analysis') {
-                steps {
-                    withSonarQubeEnv('SonarQServer') {
-                        sh '''
-                            mvn clean verify sonar:sonar -Dsonar.projectKey=DemoProjectSonarGithub -Dsonar.projectName='DemoProjectSonarGithub' -Dsonar.host.url=http://sonar:9000
-                        '''
-                        echo 'SonarQube Analysis Completed'
-                    }
+        stage('Postman CLI Login') {
+            steps {
+                withCredentials([string(credentialsId: 'postman-token', variable: 'POSTMAN_API_KEY')]){
+                    sh 'postman login --with-api-key $POSTMAN_API_KEY'
                 }
             }
         }
-    } catch (e){
-        currentBuild.result = "FAILED"
-        throw e
+
+        stage('Running collection') {
+            steps {
+                sh 'postman collection run "24464678-797b1e32-ba59-4604-9873-1ea97a2bc9c4"'
+            }
+        }
+
+        stage('Call External Endpoint') {
+            steps {
+                script {
+                    def endpointUrl = "https://pokeapi.co/api/v2/pokemon/${params.POKEMON_NAME}"
+                    def response = httpRequest url: endpointUrl, validResponseCodes: '200:299'
+                    def jsonResponse = readJSON text: response.content
+                    echo "Response from API: ${jsonResponse}"
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQServer') {
+                    sh '''
+                        mvn clean verify sonar:sonar -Dsonar.projectKey=DemoProjectSonarGithub -Dsonar.projectName='DemoProjectSonarGithub' -Dsonar.host.url=http://sonar:9000
+                    '''
+                    echo 'SonarQube Analysis Completed'
+                }
+            }
+        }
     }
 }
