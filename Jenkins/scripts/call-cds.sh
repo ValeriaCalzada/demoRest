@@ -16,6 +16,6 @@ ENCODED_TOKEN=$(echo -n "$response.access_token" | base64)
 
 echo $ENCODED_TOKEN
 
-curl -H "Authorization: Bearer ${ENCODED_TOKEN}" -H 'Content-Type: application/json' \
+curl  -H "Content-Type: application/json" -H "Authorization: Bearer ${ENCODED_TOKEN}"\
         -X POST \
         "$CDS_INIT_URL"
