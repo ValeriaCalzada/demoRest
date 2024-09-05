@@ -12,7 +12,8 @@ responseAuth=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Acc
         -d "$body" \
         "$TOKEN_URL")
 
-ENCODED_TOKEN=$(echo -n "$responseAuth.access_token" | base64)
+access_token=$(echo "$responseAuth" | jq -r '.access_token')
+ENCODED_TOKEN=$(echo -n "$access_token" | base64)
 
 responseSession=$(curl --http1.1 -H "Content-Type: application/json" -H "Authorization: Bearer ${ENCODED_TOKEN}"\
         -X POST \
