@@ -19,4 +19,4 @@ responseSession=$(curl -H "Content-Type: application/json" -H "Authorization: Be
         -X GET \
         "$CDS_INIT_URL" -w '%{http_code}')
 
-echo "${responseSession}"
+echo "La respuesta es: ${responseSession}"
