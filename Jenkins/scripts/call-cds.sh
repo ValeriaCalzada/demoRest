@@ -18,7 +18,7 @@ responseSession=$(curl -H "Content-Type: application/json" -H "Authorization: Be
         -X GET \
         -c - "$CDS_INIT_URL" -w '%{http_code}')
 
-jSessionId=$(echo "responseSession" | grep 'JSESSIONID'| awk '{print $7}')
+jSessionId=$(echo "$responseSession" | grep 'JSESSIONID'| awk '{print $7}')
 
 
 echo "La respuesta es: ${jSessionId}"
