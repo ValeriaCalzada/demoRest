@@ -21,10 +21,10 @@ responseSession=$(curl -H "Content-Type: application/json" -H "Authorization: Be
 jSessionId=$(echo "$responseSession" | grep 'JSESSIONID'| awk '{print $7}')
 XSRFTOKEN=$(echo "$responseSession" | grep 'XSRFTOKEN'| awk '{print $7}')
 
-bodyApplication='{"payload": "{\"device\":{\"deviceId\":\"2\",\"ipAddress\":\"1.127.0.1\"},\"applicationId\":\"12\"}"}'
+bodyApplication='{"payload": "{\"device\":{\"deviceId\":\"3\",\"ipAddress\":\"1.127.0.1\"},\"applicationId\":\"12\"}"}'
 responseCDS=$(curl -H "Content-Type: application/json" -H "Authorization: Bearer ${ENCODED_TOKEN}" -H "X-XSRF-TOKEN: ${XSRFTOKEN}" \
         -X POST \
         -d "$bodyApplication" \
-        "$GATEWAY_URL/feature-store-adapter-service/v2/data/Application")
+        "$GATEWAY_URL/feature-store-adapter-service/v2/data/Application" -w '%{http_code}')
 
 echo "La respuesta es: ${responseCDS}"
