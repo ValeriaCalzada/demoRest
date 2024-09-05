@@ -23,7 +23,7 @@ XSRFTOKEN=$(echo "$responseSession" | grep 'XSRFTOKEN'| awk '{print $7}')
 
 bodyApplication='{"payload": "{\"device\":{\"deviceId\":\"2\",\"ipAddress\":\"1.127.0.1\"},\"applicationId\":\"12\"}"}'
 responseCDS=$(curl -H "Content-Type: application/json" -H "Authorization: Bearer ${ENCODED_TOKEN}" -H "X-XSRF-TOKEN: ${XSRFTOKEN}" \
-        -X GET \
+        -X POST \
         -d "$bodyApplication" \
         "$GATEWAY_URL/feature-store-adapter-service/v2/data/Application")
 
