@@ -25,7 +25,7 @@ bodyApplication='{"payload": "{\"device\":{\"deviceId\":\"3\",\"ipAddress\":\"1.
 responseCDS=$(curl -H "Content-Type: application/json" -H "Authorization: Bearer ${ENCODED_TOKEN}" -H "X-XSRF-TOKEN: ${XSRFTOKEN}" \
         -X POST \
         -d "$bodyApplication" \
-        --cookie echo "$responseSession"
+        --cookie <echo "$responseSession">
         "$GATEWAY_URL/feature-store-adapter-service/v2/data/Application" -w '%{http_code}')
 
 echo "La respuesta es: ${responseCDS}"
