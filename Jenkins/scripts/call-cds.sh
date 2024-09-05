@@ -15,8 +15,8 @@ responseAuth=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Acc
 access_token=$(echo "$responseAuth" | jq -r '.access_token')
 ENCODED_TOKEN=$(echo -n "$access_token" | base64)
 
-responseSession=$(curl --http1.1 -H "Content-Type: application/json" -H "Authorization: Bearer ${ENCODED_TOKEN}" \
-        -X POST \
+responseSession=$(curl -H "Content-Type: application/json" -H "Authorization: Bearer ${ENCODED_TOKEN}" \
+        -X GET \
         "$CDS_INIT_URL" -w '%{http_code}')
 
 echo "${responseSession}"
