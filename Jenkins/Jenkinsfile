@@ -24,7 +24,8 @@ pipeline {
                     withCredentials([string(credentialsId: 'client-secret', variable: 'CLIENT_SECRET')]){
                         script{
                             sh 'chmod +x ./Jenkins/scripts/call-cds.sh'
-                            env.bearer_token=sh([script: "./Jenkins/scripts/call-cds.sh", returnStdout: true]).trim()
+                            sh "./Jenkins/scripts/call-cds.sh"
+                           // env.bearer_token=sh([script: "./Jenkins/scripts/call-cds.sh", returnStdout: true]).trim()
                         }
                     }
                 }
