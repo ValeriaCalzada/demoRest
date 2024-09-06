@@ -17,11 +17,12 @@ responseAuth=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Acc
 
 access_token=$(echo "$responseAuth" | jq -r '.access_token')
 echo $access_token
+bearerToken="Bearer $access_token"
 
 #url to list applications elegible for promotion
 listApplication=$(curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: TestApplication' \
         -X POST \
-        -H "Authorization: Bearer ${access_token}" \
+        -H "Authorization: $bearerToken" \
         --insecure \
         "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15")
 
