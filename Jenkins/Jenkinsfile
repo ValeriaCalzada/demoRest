@@ -23,13 +23,16 @@ pipeline {
                 withEnv(["CLIENT_ID=${params.CLIENT_ID}"]) {
                     withCredentials([string(credentialsId: 'client-secret', variable: 'CLIENT_SECRET')]){
                         script{
-                            sh 'bodyAuth="grant_type=client_credentials"'
-                            responseAuth=sh([script: 'curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
-                                            -X POST \
-                                            -u "${CLIENT_ID}:${CLIENT_SECRET}" \
-                                            -d "$bodyAuth" \
-                                            --insecure \
-                                            "$TOKEN_URL"', returnStdout: true]).trim()
+                            //sh 'bodyAuth="grant_type=client_credentials"'
+                            responseAuth=sh([script: '''
+                                            bodyAuth="grant_type=client_credentials"
+                                            curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
+                                                    -X POST \
+                                                    -u "${CLIENT_ID}:${CLIENT_SECRET}" \
+                                                    -d "$bodyAuth" \
+                                                    --insecure \
+                                                    "$TOKEN_URL")
+                                                    '''
                             println(responseAuth)
                             access_token=sh([script: '$(echo "$responseAuth" | jq -r \'.access_token\')', returnStdout: true]).trim()
 
