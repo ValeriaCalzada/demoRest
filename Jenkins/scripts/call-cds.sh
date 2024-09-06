@@ -5,11 +5,12 @@
 #cambiar a env var in jenkins
 TOKEN_URL=$TOKEN_URL 
 
-bodyAuth="client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials"
+bodyAuth="grant_type=client_credentials"
 
 responseAuth=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
         -X POST \
         -u "${CLIENT_ID}:${CLIENT_SECRET}" \
+        -d "$bodyAuth"
         --insecure \
         "$TOKEN_URL")
 
@@ -19,7 +20,7 @@ listApplication=$(curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: TestApp
         -X POST \
         -H "Authorization: Bearer ${access_token}" \
         --insecure \
-        -c - "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15")
+        "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15")
 
 # jSessionId=$(echo "$responseSession" | grep 'JSESSIONID'| awk '{print $7}')
 # XSRFTOKEN=$(echo "$responseSession" | grep 'XSRFTOKEN'| awk '{print $7}')
