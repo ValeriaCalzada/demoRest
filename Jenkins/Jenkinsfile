@@ -30,6 +30,7 @@ pipeline {
                                             -d "$bodyAuth" \
                                             --insecure \
                                             "$TOKEN_URL"', returnStdout: true]).trim()
+                            println(responseAuth)
                             access_token=sh([script: '$(echo "$responseAuth" | jq -r \'.access_token\')', returnStdout: true]).trim()
 
                             sh 'echo "$access_token"'
