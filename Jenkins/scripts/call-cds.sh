@@ -21,7 +21,7 @@ bearerToken="Bearer $access_token"
 
 #url to list applications elegible for promotion
 listApplication=$(curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: TestApplication' \
-        -X POST \
+        -X GET \
         -H "Authorization: $bearerToken" \
         --insecure \
         "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15")
