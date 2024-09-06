@@ -45,13 +45,15 @@ pipeline {
         stage('List All Eligible Applications') {
             steps {
                 withCredentials([string(credentialsId: 'postman-token', variable: 'POSTMAN_API_KEY')]){
-                    env.listApplication=sh([script: '''
-                                    curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: TestApplication' \
-                                            -X GET \
-                                            -H "Authorization: $bearerToken" \
-                                            --insecure \
-                                            "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15"
-                                            ''', returnStdout: true]).trim()
+                    script{
+                            env.listApplication=sh([script: '''
+                                            curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: TestApplication' \
+                                                    -X GET \
+                                                    -H "Authorization: $bearerToken" \
+                                                    --insecure \
+                                                    "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15"
+                                                    ''', returnStdout: true]).trim()
+                    }
                     echo "${listApplication}"
                 }
             }
