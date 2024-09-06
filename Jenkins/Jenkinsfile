@@ -25,13 +25,13 @@ pipeline {
                         script{
                          //   sh '''
                             bodyAuth="grant_type=client_credentials"
-                            responseAuth=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
+                            sh 'responseAuth=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
                                             -X POST \
                                             -u "${CLIENT_ID}:${CLIENT_SECRET}" \
                                             -d "$bodyAuth" \
                                             --insecure \
-                                            "$TOKEN_URL")
-                            access_token=$(echo "$responseAuth" | jq -r '.access_token')
+                                            "$TOKEN_URL")'
+                            access_token=$(echo "${responseAuth}" | jq -r '.access_token')
 
                            // '''
                             echo "$access_token"
