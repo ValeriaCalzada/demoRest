@@ -33,7 +33,7 @@ pipeline {
                                                     --insecure \
                                                     "$TOKEN_URL"
                                                     ''', returnStdout: true]).trim()
-                            env.access_token=sh([script: '$(echo ${responseAuth} | jq -r \'.access_token\')', returnStdout: true]).trim()
+                            env.access_token=sh([script: '($(echo ${responseAuth} | jq -r \'.access_token\'))', returnStdout: true]).trim()
                           //  sh 'chmod +x ./Jenkins/scripts/call-cds.sh'
                             //sh "./Jenkins/scripts/call-cds.sh"
                            // env.bearer_token=sh([script: "./Jenkins/scripts/call-cds.sh", returnStdout: true]).trim()
