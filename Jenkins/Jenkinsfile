@@ -18,13 +18,25 @@ pipeline {
             }
         }
 
-        stage('Script execution') {
+        stage('Token retrieval') {
             steps {
-                withEnv(["CLIENT_ID=${params.CLIENT_ID}", "SOLUTION_ID=${params.SOLUTION_ID}"]) {
+                withEnv(["CLIENT_ID=${params.CLIENT_ID}"]) {
                     withCredentials([string(credentialsId: 'client-secret', variable: 'CLIENT_SECRET')]){
                         script{
-                            sh 'chmod +x ./Jenkins/scripts/call-cds.sh'
-                            sh "./Jenkins/scripts/call-cds.sh"
+                            sh '''
+                            bodyAuth="grant_type=client_credentials"
+                            responseAuth=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
+                                            -X POST \
+                                            -u "${CLIENT_ID}:${CLIENT_SECRET}" \
+                                            -d "$bodyAuth" \
+                                            --insecure \
+                                            "$TOKEN_URL")
+                            access_token=$(echo "$responseAuth" | jq -r '.access_token')
+
+                            '''
+                            echo "$access_token"
+                          //  sh 'chmod +x ./Jenkins/scripts/call-cds.sh'
+                            //sh "./Jenkins/scripts/call-cds.sh"
                            // env.bearer_token=sh([script: "./Jenkins/scripts/call-cds.sh", returnStdout: true]).trim()
                         }
                     }
