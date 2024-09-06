@@ -14,19 +14,20 @@ responseAuth=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Acc
         "$TOKEN_URL")
 
 access_token=$(echo "$responseAuth" | jq -r '.access_token')
-ENCODED_TOKEN=$(echo -n "$access_token" | base64)
-responseSession=$(curl -H "Content-Type: application/json" -H "Authorization: Bearer ${ENCODED_TOKEN}" \
-        -X GET \
-        -c - "$GATEWAY_URL/init" -w '%{http_code}')
-
-jSessionId=$(echo "$responseSession" | grep 'JSESSIONID'| awk '{print $7}')
-XSRFTOKEN=$(echo "$responseSession" | grep 'XSRFTOKEN'| awk '{print $7}')
-
-bodyApplication='{"payload": "{\"device\":{\"deviceId\":\"3\",\"ipAddress\":\"1.127.0.1\"},\"applicationId\":\"12\"}"}'
-responseCDS=$(curl -H "Content-Type: application/json" -H "Authorization: Bearer ${ENCODED_TOKEN}" -H "X-XSRF-TOKEN: ${XSRFTOKEN}" \
+#url to list applications elegible for promotion
+listApplication=$(curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: TestApplication' \
         -X POST \
-        -d "$bodyApplication" \
-        --cookie "$responseSession" \
-        "$GATEWAY_URL/feature-store-adapter-service/v2/data/Application" -w '%{http_code}')
+        -H "Authorization: Bearer ${access_token}" \
+        -c - "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15")
 
-echo "La respuesta es: ${responseCDS}"
+# jSessionId=$(echo "$responseSession" | grep 'JSESSIONID'| awk '{print $7}')
+# XSRFTOKEN=$(echo "$responseSession" | grep 'XSRFTOKEN'| awk '{print $7}')
+
+# bodyApplication='{"payload": "{\"device\":{\"deviceId\":\"3\",\"ipAddress\":\"1.127.0.1\"},\"applicationId\":\"12\"}"}'
+# responseCDS=$(curl -H "Content-Type: application/json" -H "Authorization: Bearer ${ENCODED_TOKEN}" -H "X-XSRF-TOKEN: ${XSRFTOKEN}" \
+#         -X POST \
+#         -d "$bodyApplication" \
+#         --cookie "$responseSession" \
+#         "$GATEWAY_URL/feature-store-adapter-service/v2/data/Application" -w '%{http_code}')
+
+echo "La respuesta es: ${listApplication}"
