@@ -31,7 +31,7 @@ pipeline {
                                             --insecure \
                                             "$TOKEN_URL"', returnStdout: true]).trim()
 
-                            access_token = sh(script: 'echo \'${responseAuth}\' | jq -r \'.access_token\'', returnStdout: true).trim()
+                            access_token = sh(script: '$(echo \'${responseAuth}\' | jq -r \'.access_token\')', returnStdout: true).trim()
 
                             echo "${access_token}"
                           //  sh 'chmod +x ./Jenkins/scripts/call-cds.sh'
