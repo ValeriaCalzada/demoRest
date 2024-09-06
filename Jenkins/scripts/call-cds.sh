@@ -10,7 +10,7 @@ bodyAuth="client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=clien
 responseAuth=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
         -X POST \
         -u "${CLIENT_ID}:${CLIENT_SECRET}" \
-        -k/--insecure \
+        --insecure \
         "$TOKEN_URL")
 
 access_token=$(echo "$responseAuth" | jq -r '.access_token')
