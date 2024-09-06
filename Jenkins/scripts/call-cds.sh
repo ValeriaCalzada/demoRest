@@ -5,11 +5,12 @@
 #cambiar a env var in jenkins
 TOKEN_URL=$TOKEN_URL 
 
-bodyAuth="client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials&realm=/FicoAnalyticCloud"
+bodyAuth="client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=client_credentials"
 
 responseAuth=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
         -X POST \
-        -d "$bodyAuth" \
+        -u "${CLIENT_ID}:${CLIENT_SECRET}" \
+        -k/--insecure \
         "$TOKEN_URL")
 
 access_token=$(echo "$responseAuth" | jq -r '.access_token')
