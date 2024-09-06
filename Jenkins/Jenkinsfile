@@ -32,7 +32,7 @@ pipeline {
                                             "$TOKEN_URL"', returnStdout: true]).trim()
                             access_token=sh([script: '$(echo "$responseAuth" | jq -r \'.access_token\')', returnStdout: true]).trim()
 
-                            echo "${access_token}"
+                            sh 'echo "$access_token"'
                           //  sh 'chmod +x ./Jenkins/scripts/call-cds.sh'
                             //sh "./Jenkins/scripts/call-cds.sh"
                            // env.bearer_token=sh([script: "./Jenkins/scripts/call-cds.sh", returnStdout: true]).trim()
