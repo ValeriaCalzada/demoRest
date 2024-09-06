@@ -24,7 +24,7 @@ pipeline {
                     withCredentials([string(credentialsId: 'client-secret', variable: 'CLIENT_SECRET')]){
                         script{
                             //sh 'bodyAuth="grant_type=client_credentials"'
-                            env.responseAuth=sh([script: '''
+                            responseAuth=sh([script: '''
                                             bodyAuth="grant_type=client_credentials"
                                             curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
                                                     -X POST \
@@ -33,10 +33,7 @@ pipeline {
                                                     --insecure \
                                                     "$TOKEN_URL"
                                                     ''', returnStdout: true]).trim()
-                            println(env.responseAuth)
-                            access_token=sh([script: '$(echo ${responseAuth} | jq -r \'.access_token\')', returnStdout: true]).trim()
-
-                            sh 'echo "$access_token"'
+                            env.access_token=sh([script: '$(echo ${responseAuth} | jq -r \'.access_token\')', returnStdout: true]).trim()
                           //  sh 'chmod +x ./Jenkins/scripts/call-cds.sh'
                             //sh "./Jenkins/scripts/call-cds.sh"
                            // env.bearer_token=sh([script: "./Jenkins/scripts/call-cds.sh", returnStdout: true]).trim()
@@ -50,6 +47,7 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'postman-token', variable: 'POSTMAN_API_KEY')]){
                     sh 'postman login --with-api-key $POSTMAN_API_KEY'
+                    echo "${access_token}"
                 }
             }
         }
