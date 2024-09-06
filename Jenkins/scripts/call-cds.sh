@@ -10,7 +10,7 @@ bodyAuth="grant_type=client_credentials"
 responseAuth=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
         -X POST \
         -u "${CLIENT_ID}:${CLIENT_SECRET}" \
-        -d "$bodyAuth"
+        -d "$bodyAuth" \
         --insecure \
         "$TOKEN_URL")
 
