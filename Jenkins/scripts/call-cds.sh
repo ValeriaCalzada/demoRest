@@ -14,6 +14,8 @@ responseAuth=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Acc
         --insecure \
         "$TOKEN_URL")
 
+echo $responseAuth
+
 access_token=$(echo "$responseAuth" | jq -r '.access_token')
 #url to list applications elegible for promotion
 listApplication=$(curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: TestApplication' \
