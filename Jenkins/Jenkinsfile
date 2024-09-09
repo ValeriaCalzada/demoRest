@@ -107,13 +107,13 @@ pipeline {
                 script{
                     waitUntil{
 
-                        int statusCheck= sh(script: '''
+                        def statusCheck= sh(script: '''
                         statusCode=$(curl -s -X GET https://run.mocky.io/v3/aea9421b-ea63-43a8-a563-05f1ad7bc5ff)
                         echo "${statusCode}" | jq -r ".statusCode" 
                         ''', returnStdout: true).trim()
                         echo "${statusCheck}"
                         println(statusCheck)
-                        if (statusCheck == 200){
+                        if (statusCheck == "200"){
                             return true
                         }else {
                             sleep(15)
