@@ -107,7 +107,7 @@ pipeline {
                 script{
                     waitUntil{
 
-                        def statusCheck= sh(script: '''
+                        int statusCheck= sh(script: '''
                         statusCode=$(curl -s -X GET https://run.mocky.io/v3/aea9421b-ea63-43a8-a563-05f1ad7bc5ff)
                         echo "${statusCode}" | jq -r ".statusCode" 
                         ''', returnStdout: true).trim()
