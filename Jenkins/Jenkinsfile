@@ -107,7 +107,7 @@ pipeline {
                 script{
                     waitUntil{
 
-                        def statusCheck= sh(script: '''
+                        env.statusCheck= sh(script: '''
                         curl -s -X GET https://run.mocky.io/v3/aea9421b-ea63-43a8-a563-05f1ad7bc5ff
                         ''', returnStdout: true).trim()
                         def statusCode = sh(script: 'echo "${statusCheck}" | jq -r ".statusCode"', returnStdout: true).trim()
