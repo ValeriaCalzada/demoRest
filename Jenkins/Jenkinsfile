@@ -18,6 +18,17 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQServer') {
+                    sh '''
+                        mvn clean verify sonar:sonar -Dsonar.projectKey=DemoProjectSonarGithub -Dsonar.projectName='DemoProjectSonarGithub' -Dsonar.host.url=http://sonar:9000
+                    '''
+                    echo 'SonarQube Analysis Completed'
+                }
+            }
+        }
+
         stage('Token retrieval') {
             steps {
                 withEnv(["CLIENT_ID=${params.CLIENT_ID}"]) {
@@ -44,47 +55,80 @@ pipeline {
 
         stage('List All Eligible Applications') {
             steps {
-                withCredentials([string(credentialsId: 'postman-token', variable: 'POSTMAN_API_KEY')]){
-                    script{
-                            env.listApplication=sh([script: '''
-                                            curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: TestApplication' \
-                                                    -X GET \
-                                                    -H "Authorization: Bearer $access_token" \
-                                                    --insecure \
-                                                    "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15"
-                                                    ''', returnStdout: true]).trim()
+                script{
+                    env.listApplication=sh([script: '''
+                                    curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
+                                            -X GET \
+                                            -H "Authorization: Bearer $access_token" \
+                                            --insecure \
+                                            "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15"
+                                            ''', returnStdout: true]).trim()
+                    def application = $listApplication.filter((application) => JSON.stringify(application).toLowerCase().includes($APP_NAME.toLowerCase()))
+                    if(application == null){
+                        currentBuild.result = 'FAILURE'
+                        error("${APP_NAME} was not found as an eligible promotion application")
                     }
-                    echo "${listApplication}"
+                }
+                echo "${listApplication}"
+            }
+        }
+
+        // stage("Export ${APP_NAME} Application") {
+        //     steps {
+        //             script{
+        //                 env.exportResponse=sh([script: '''
+        //                                 curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
+        //                                         -X POST \
+        //                                         -H "Authorization: Bearer $access_token" -H "Content-Type: application/vnd.fico.dmip.v6.0+json"\
+        //                                         --insecure \
+        //                                         "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export?application-name=$APP_NAME&destination=trusted-resource&adapter-name=$DMPSTrustedResource" \
+        //                                         -w '%{http_code}'
+        //                                         ''', returnStdout: true]).trim()
+        //                 env.appZipUuidTxt=sh([script: '''
+        //                                 echo "${exportResponse}" | jq -r ".appZipUuidTxt" 
+        //                                 ''', returnStdout: true]).trim()
+        //                 statusCode=sh([script: '''
+        //                                 echo "${exportResponse}" | jq -r ".statusCode" 
+        //                                 ''', returnStdout: true]).trim()
+        //                 if(statusCode != 200 || statusCode != 202){
+        //                 currentBuild.result = 'FAILURE'
+        //                 error("There was a problem exporting ${APP_NAME} application")
+        //                 }
+        //             }
+        //             echo "${appZipUuidTxt}"
+        //     }
+        // }
+        
+
+        stage('Check status on Export $APP_NAME process') {
+            steps {
+                script{
+                    waitUntil{
+
+                        def statusCheck= sh(script: "curl -s -X GET https://run.mocky.io/v3/aea9421b-ea63-43a8-a563-05f1ad7bc5ff", returnStdout: true).trim()
+                        if (statusCheck.statusCode != 201){
+                            return false
+                        }else {
+                            return true
+                        }
+
+                    }
+                    // env.exportStatus=sh([script: '''
+                    //                 curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
+                    //                         -X GET \
+                    //                         -H "Authorization: Bearer $access_token" \
+                    //                         --insecure \
+                    //                         "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export/${appZipUuidTxt}/status"
+                    //                         ''', returnStdout: true]).trim()
+                    // application = $listApplication.filter((application) => JSON.stringify(application).toLowerCase().includes($APP_NAME.toLowerCase()))
+                    // if(application == null){
+                    //     currentBuild.result = 'FAILURE'
+                    //     error("${APP_NAME} was not found as an eligible promotion application")
+                    // }
                 }
             }
         }
 
-        stage('Running collection') {
-            steps {
-                sh 'postman collection run "24464678-797b1e32-ba59-4604-9873-1ea97a2bc9c4"'
-            }
-        }
-
-        stage('Call External Endpoint') {
-            steps {
-                script {
-                    def endpointUrl = "https://pokeapi.co/api/v2/pokemon/${params.POKEMON_NAME}"
-                    def response = httpRequest url: endpointUrl, validResponseCodes: '200:299'
-                    def jsonResponse = readJSON text: response.content
-                    echo "Response from API: ${jsonResponse}"
-                }
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('SonarQServer') {
-                    sh '''
-                        mvn clean verify sonar:sonar -Dsonar.projectKey=DemoProjectSonarGithub -Dsonar.projectName='DemoProjectSonarGithub' -Dsonar.host.url=http://sonar:9000
-                    '''
-                    echo 'SonarQube Analysis Completed'
-                }
-            }
-        }
+        
     }
 }
