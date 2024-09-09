@@ -109,13 +109,12 @@ pipeline {
 
                         def statusCheck= sh(script: '''
                         statusResponde=$(curl -s -X GET https://run.mocky.io/v3/aea9421b-ea63-43a8-a563-05f1ad7bc5ff)
-                        echo "${statusResponde}" | jq -r ".statusCode" 
                         ''', returnStdout: true).trim()
-                        echo "${statusCheck}"
-                        println(statusCheck)
-                        if (statusCheck == "200"){
+                        def statusCode = sh(script: 'echo "${statusCheck}" | jq -r ".statusCode"', returnStdout: true).trim()
+
+                        if (statusCode == "200"){
                             env.zipFileName=sh(script: '''
-                                statusMessage=$(echo "${statusResponde}" | jq -r ".statusMessage") 
+                                statusMessage=$(echo "${statusCheck}" | jq -r ".statusMessage") 
                                 echo "${statusMessage}" | grep -oP "'[^']+\\.zip'" | sed "s/'//g" 
                                 ''', returnStdout: true).trim()
                             return true
