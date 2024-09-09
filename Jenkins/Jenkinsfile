@@ -113,6 +113,7 @@ pipeline {
                         ''', returnStdout: true).trim()
                         echo "${statusCheck}"
                         println(statusCheck)
+                        sleep(15)
                         if (statusCheck != 201){
                             return false
                         }else {
