@@ -109,6 +109,7 @@ pipeline {
 
                         def statusCheck= sh(script: "curl -s -X GET https://run.mocky.io/v3/aea9421b-ea63-43a8-a563-05f1ad7bc5ff", returnStdout: true).trim()
                         echo "${statusCheck}"
+                        println(statusCheck)
                         if (statusCheck.statusCode != 201){
                             return false
                         }else {
