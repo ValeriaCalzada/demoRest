@@ -111,7 +111,7 @@ pipeline {
                         curl -s -X GET https://run.mocky.io/v3/aea9421b-ea63-43a8-a563-05f1ad7bc5ff
                         ''', returnStdout: true).trim()
                         def statusCode = sh(script: 'echo "${statusCheck}" | jq -r ".statusCode"', returnStdout: true).trim()
-                        println(statusCode)
+                        println(statusCheck)
                         if (statusCode == "200"){
                             env.zipFileName=sh(script: '''
                                 statusMessage=$(echo "${statusCheck}" | jq -r ".statusMessage") 
