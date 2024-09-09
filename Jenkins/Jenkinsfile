@@ -114,7 +114,7 @@ pipeline {
                         echo "${statusCheck}"
                         println(statusCheck)
                         sleep(15)
-                        if (statusCheck != 201){
+                        if (statusCheck != 200){
                             return false
                         }else {
                             return true
