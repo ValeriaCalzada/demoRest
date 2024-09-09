@@ -115,7 +115,8 @@ pipeline {
                         println(statusCheck)
                         if (statusCheck == "200"){
                             env.zipFileName=sh(script: '''
-                                echo "${statusResponde}" | grep -oP "'[^']+\\.zip'" | sed "s/'//g" 
+                                statusMessage=echo "${statusResponde}" | jq -r ".statusMessage" 
+                                echo "${statusMessage}" | grep -oP "'[^']+\\.zip'" | sed "s/'//g" 
                                 ''', returnStdout: true).trim()
                             return true
                         }else {
