@@ -113,7 +113,7 @@ pipeline {
                         ''', returnStdout: true).trim()
                         echo "${statusCheck}"
                         println(statusCheck)
-                        if (statusCheck.statusCode != 201){
+                        if (statusCheck != 201){
                             return false
                         }else {
                             return true
