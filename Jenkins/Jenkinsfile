@@ -29,51 +29,51 @@ pipeline {
             }
         }
 
-        stage('Token retrieval') {
-            steps {
-                withEnv(["CLIENT_ID=${params.CLIENT_ID}"]) {
-                    withCredentials([string(credentialsId: 'client-secret', variable: 'CLIENT_SECRET')]){
-                        script{
-                            env.responseAuth=sh([script: '''
-                                            bodyAuth="grant_type=client_credentials"
-                                            curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
-                                                    -X POST \
-                                                    -u "${CLIENT_ID}:${CLIENT_SECRET}" \
-                                                    -d "$bodyAuth" \
-                                                    --insecure \
-                                                    "$TOKEN_URL"
-                                                    ''', returnStdout: true]).trim()
-                            env.access_token=sh([script: '''
-                                            echo "${responseAuth}" > response.json
-                                            jq -r ".access_token" response.json
-                                            ''', returnStdout: true]).trim()
-                        }
-                    }
-                }
-            }
-        }
+        // stage('Token retrieval') {
+        //     steps {
+        //         withEnv(["CLIENT_ID=${params.CLIENT_ID}"]) {
+        //             withCredentials([string(credentialsId: 'client-secret', variable: 'CLIENT_SECRET')]){
+        //                 script{
+        //                     env.responseAuth=sh([script: '''
+        //                                     bodyAuth="grant_type=client_credentials"
+        //                                     curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
+        //                                             -X POST \
+        //                                             -u "${CLIENT_ID}:${CLIENT_SECRET}" \
+        //                                             -d "$bodyAuth" \
+        //                                             --insecure \
+        //                                             "$TOKEN_URL"
+        //                                             ''', returnStdout: true]).trim()
+        //                     env.access_token=sh([script: '''
+        //                                     echo "${responseAuth}" > response.json
+        //                                     jq -r ".access_token" response.json
+        //                                     ''', returnStdout: true]).trim()
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
-        stage('List All Eligible Applications') {
-            steps {
-                script{
-                    env.listApplication=sh([script: '''
-                                    curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
-                                            -X GET \
-                                            -H "Authorization: Bearer $access_token" \
-                                            --insecure \
-                                            "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15"
-                                            ''', returnStdout: true]).trim()
-                    def application = env.listApplication.findAll { app ->
-                            app.toString().toLowerCase().contains(APP_NAME.toLowerCase())
-                    }                    
-                    if(application == null){
-                        currentBuild.result = 'FAILURE'
-                        error("${APP_NAME} was not found as an eligible promotion application")
-                    }
-                }
-                echo "${listApplication}"
-            }
-        }
+        // stage('List All Eligible Applications') {
+        //     steps {
+        //         script{
+        //             env.listApplication=sh([script: '''
+        //                             curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
+        //                                     -X GET \
+        //                                     -H "Authorization: Bearer $access_token" \
+        //                                     --insecure \
+        //                                     "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15"
+        //                                     ''', returnStdout: true]).trim()
+        //             def application = env.listApplication.findAll { app ->
+        //                     app.toString().toLowerCase().contains(APP_NAME.toLowerCase())
+        //             }                    
+        //             if(application == null){
+        //                 currentBuild.result = 'FAILURE'
+        //                 error("${APP_NAME} was not found as an eligible promotion application")
+        //             }
+        //         }
+        //         echo "${listApplication}"
+        //     }
+        // }
 
         // stage("Export ${APP_NAME} Application") {
         //     steps {
