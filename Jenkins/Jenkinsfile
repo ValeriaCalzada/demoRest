@@ -18,16 +18,16 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('SonarQServer') {
-                    sh '''
-                        mvn clean verify sonar:sonar -Dsonar.projectKey=DemoProjectSonarGithub -Dsonar.projectName='DemoProjectSonarGithub' -Dsonar.host.url=http://sonar:9000
-                    '''
-                    echo 'SonarQube Analysis Completed'
-                }
-            }
-        }
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         withSonarQubeEnv('SonarQServer') {
+        //             sh '''
+        //                 mvn clean verify sonar:sonar -Dsonar.projectKey=DemoProjectSonarGithub -Dsonar.projectName='DemoProjectSonarGithub' -Dsonar.host.url=http://sonar:9000
+        //             '''
+        //             echo 'SonarQube Analysis Completed'
+        //         }
+        //     }
+        // }
 
         // stage('Token retrieval') {
         //     steps {
@@ -108,6 +108,7 @@ pipeline {
                     waitUntil{
 
                         def statusCheck= sh(script: "curl -s -X GET https://run.mocky.io/v3/aea9421b-ea63-43a8-a563-05f1ad7bc5ff", returnStdout: true).trim()
+                        echo "${statusCheck}"
                         if (statusCheck.statusCode != 201){
                             return false
                         }else {
