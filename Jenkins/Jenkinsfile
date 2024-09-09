@@ -108,19 +108,22 @@ pipeline {
                     waitUntil{
 
                         def statusCheck= sh(script: '''
-                        statusCode=$(curl -s -X GET https://run.mocky.io/v3/aea9421b-ea63-43a8-a563-05f1ad7bc5ff)
-                        echo "${statusCode}" | jq -r ".statusCode" 
+                        statusResponde=$(curl -s -X GET https://run.mocky.io/v3/aea9421b-ea63-43a8-a563-05f1ad7bc5ff)
+                        echo "${statusResponde}" | jq -r ".statusCode" 
                         ''', returnStdout: true).trim()
                         echo "${statusCheck}"
                         println(statusCheck)
                         if (statusCheck == "200"){
+                            env.zipFileName=sh(script: '''
+                                echo "${statusResponde}" | grep -oP "'[^']+\\.zip'" | sed "s/'//g" 
+                                ''', returnStdout: true).trim()
                             return true
                         }else {
                             sleep(15)
                             return false
                         }
-
                     }
+                    echo "${zipFileName}"
                     // env.exportStatus=sh([script: '''
                     //                 curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
                     //                         -X GET \
@@ -136,6 +139,15 @@ pipeline {
                 }
             }
         }
+
+        stage('IMPORT') {
+            steps {
+                script{
+                       echo "${zipFileName}"
+                
+                    }
+                    }
+                    }
 
         
     }
