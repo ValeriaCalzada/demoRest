@@ -207,7 +207,7 @@ pipeline {
                                         echo "${statusCheck}" | jq -r ".statusCode" 
                                         ''', returnStdout: true]).trim()
                                     if(statusCode == "400" || statusCode == "500"){
-                                        throw new Exception
+                                        throw new Exception()
                                     }
                                     sleep(15)
                                     return false
