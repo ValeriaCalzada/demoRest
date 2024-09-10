@@ -73,7 +73,7 @@ pipeline {
             }
         }
 
-        stage("Export ${APP_NAME} Application") {
+        stage('Export ${APP_NAME} Application') {
             steps {
                     script{
                         env.exportResponse=sh([script: '''
