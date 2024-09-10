@@ -5,6 +5,10 @@ pipeline {
         nodejs "nodejs-jenkins-installation-22.7.0"
     }
 
+    options {
+        timeout(time: 2, unit: 'MINUTES')
+    }
+
     stages {
 
         stage('Git Checkout') {
@@ -150,7 +154,7 @@ pipeline {
                                                 -d auto-job-start=$JOB_AUTOSTART \
                                                 -w '%{http_code}'
                                                 ''', returnStdout: true]).trim()
-                        env.appZipUuidTxt=sh([script: '''
+                        env.appZipUuidTxtImport=sh([script: '''
                                         echo "${importResponse}" | jq -r ".appZipUuidTxt" 
                                         ''', returnStdout: true]).trim()
                         statusCode=sh([script: '''
@@ -174,11 +178,11 @@ pipeline {
                                              -X GET \
                                              -H "Authorization: Bearer $access_token" \
                                              --insecure \
-                                             "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export/${appZipUuidTxt}/status"
+                                             "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/import/${appZipUuidTxtImport}/status"
                                              ''', returnStdout: true]).trim()
                         def appZipStatus = sh(script: 'echo "${statusCheck}" | jq -r ".appZipStatus"', returnStdout: true).trim()
 
-                        if (appZipStatus == "UPLOADED"){
+                        if (appZipStatus == "IMPORT_COMPLETED"){
                             env.zipFileName=sh(script: '''
                                 statusMessage=$(echo "${statusCheck}" | jq -r ".statusMessage") 
                                 echo "${statusMessage}" | grep -oP "'[^']+\\.zip'" | sed "s/'//g" 
