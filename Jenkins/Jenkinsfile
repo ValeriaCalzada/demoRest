@@ -172,10 +172,7 @@ pipeline {
                             def appZipStatus = sh(script: 'echo "${statusCheck}" | jq -r ".appZipStatus"', returnStdout: true).trim()
 
                             if (appZipStatus == "IMPORT_COMPLETED"){
-                                env.zipFileName=sh(script: '''
-                                    statusMessage=$(echo "${statusCheck}" | jq -r ".statusMessage") 
-                                    echo "${statusMessage}" | grep -oP "'[^']+\\.zip'" | sed "s/'//g" 
-                                    ''', returnStdout: true).trim()
+                                
                                 return true
                             }else {
                                 sleep(15)
@@ -183,7 +180,6 @@ pipeline {
                             }
                         }
                     }
-                    echo "${zipFileName}"
                 }
             }
         }
