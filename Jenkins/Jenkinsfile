@@ -5,10 +5,6 @@ pipeline {
         nodejs "nodejs-jenkins-installation-22.7.0"
     }
 
-    options {
-        timeout(time: 2, unit: 'MINUTES')
-    }
-
     stages {
 
         stage('Git Checkout') {
@@ -35,21 +31,19 @@ pipeline {
 
         stage('Token retrieval') {
             steps {
-                withEnv(["CLIENT_ID=${params.CLIENT_ID}"]) {
-                    withCredentials([string(credentialsId: 'client-secret', variable: 'CLIENT_SECRET')]){
-                        script{
-                            env.access_token=sh([script: '''
-                                            bodyAuth="grant_type=client_credentials"
-                                            responseAuth=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
-                                                    -X POST \
-                                                    -u "${CLIENT_ID}:${CLIENT_SECRET}" \
-                                                    -d "$bodyAuth" \
-                                                    --insecure \
-                                                    "$TOKEN_URL")
-                                            echo "${responseAuth}" > response.json
-                                            jq -r ".access_token" response.json
-                                            ''', returnStdout: true]).trim()
-                        }
+                withCredentials([string(credentialsId: 'client-secret', variable: 'CLIENT_SECRET')]){
+                    script{
+                        env.access_token=sh([script: '''
+                                        bodyAuth="grant_type=client_credentials"
+                                        responseAuth=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
+                                                -X POST \
+                                                -u "${CLIENT_ID}:${CLIENT_SECRET}" \
+                                                -d "$bodyAuth" \
+                                                --insecure \
+                                                "$TOKEN_URL")
+                                        echo "${responseAuth}" > response.json
+                                        jq -r ".access_token" response.json
+                                        ''', returnStdout: true]).trim()
                     }
                 }
             }
@@ -107,27 +101,30 @@ pipeline {
         stage('Check status on Export $APP_NAME process') {
             steps {
                 script{
-                    waitUntil{
-                        env.statusCheck= sh([script: '''
-                                curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
-                                             -X GET \
-                                             -H "Authorization: Bearer $access_token" \
-                                             --insecure \
-                                             "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export/${appZipUuidTxt}/status"
-                                             ''', returnStdout: true]).trim()
-                        def appZipStatus = sh(script: 'echo "${statusCheck}" | jq -r ".appZipStatus"', returnStdout: true).trim()
+                    timeout(time: 2, unit: 'MINUTES'){
+                        waitUntil{
+                            env.statusCheck= sh([script: '''
+                                    curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
+                                                -X GET \
+                                                -H "Authorization: Bearer $access_token" \
+                                                --insecure \
+                                                "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export/${appZipUuidTxt}/status"
+                                                ''', returnStdout: true]).trim()
+                            def appZipStatus = sh(script: 'echo "${statusCheck}" | jq -r ".appZipStatus"', returnStdout: true).trim()
 
-                        if (appZipStatus == "UPLOADED"){
-                            env.zipFileName=sh(script: '''
-                                statusMessage=$(echo "${statusCheck}" | jq -r ".statusMessage") 
-                                echo "${statusMessage}" | grep -oP "'[^']+\\.zip'" | sed "s/'//g" 
-                                ''', returnStdout: true).trim()
-                            return true
-                        }else {
-                            sleep(15)
-                            return false
+                            if (appZipStatus == "UPLOADED"){
+                                env.zipFileName=sh(script: '''
+                                    statusMessage=$(echo "${statusCheck}" | jq -r ".statusMessage") 
+                                    echo "${statusMessage}" | grep -oP "'[^']+\\.zip'" | sed "s/'//g" 
+                                    ''', returnStdout: true).trim()
+                                return true
+                            }else {
+                                sleep(15)
+                                return false
+                            }
                         }
                     }
+                    
                     echo "${zipFileName}"
                 }
             }
@@ -172,25 +169,27 @@ pipeline {
         stage('Check status on Import $APP_NAME process') {
             steps {
                 script{
-                    waitUntil{
-                        env.statusCheck= sh([script: '''
-                                curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
-                                             -X GET \
-                                             -H "Authorization: Bearer $access_token" \
-                                             --insecure \
-                                             "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/import/${appZipUuidTxtImport}/status"
-                                             ''', returnStdout: true]).trim()
-                        def appZipStatus = sh(script: 'echo "${statusCheck}" | jq -r ".appZipStatus"', returnStdout: true).trim()
+                    timeout(time: 2, unit: 'MINUTES'){
+                        waitUntil{
+                            env.statusCheck= sh([script: '''
+                                    curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
+                                                -X GET \
+                                                -H "Authorization: Bearer $access_token" \
+                                                --insecure \
+                                                "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/import/${appZipUuidTxtImport}/status"
+                                                ''', returnStdout: true]).trim()
+                            def appZipStatus = sh(script: 'echo "${statusCheck}" | jq -r ".appZipStatus"', returnStdout: true).trim()
 
-                        if (appZipStatus == "IMPORT_COMPLETED"){
-                            env.zipFileName=sh(script: '''
-                                statusMessage=$(echo "${statusCheck}" | jq -r ".statusMessage") 
-                                echo "${statusMessage}" | grep -oP "'[^']+\\.zip'" | sed "s/'//g" 
-                                ''', returnStdout: true).trim()
-                            return true
-                        }else {
-                            sleep(15)
-                            return false
+                            if (appZipStatus == "IMPORT_COMPLETED"){
+                                env.zipFileName=sh(script: '''
+                                    statusMessage=$(echo "${statusCheck}" | jq -r ".statusMessage") 
+                                    echo "${statusMessage}" | grep -oP "'[^']+\\.zip'" | sed "s/'//g" 
+                                    ''', returnStdout: true).trim()
+                                return true
+                            }else {
+                                sleep(15)
+                                return false
+                            }
                         }
                     }
                     echo "${zipFileName}"
