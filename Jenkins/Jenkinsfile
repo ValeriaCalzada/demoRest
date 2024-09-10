@@ -138,12 +138,13 @@ pipeline {
                                     curl -H 'dmip-tenant-id: 2' -H 'dmip-application-name: $CLIENT_ID' \
                                                 -X POST \
                                                 -H "Authorization: Bearer $access_token" -H "Content-Type: application/vnd.fico.dmip.v6.0+json"\
-                                                -H "git-username: $GIT_USERNAME" -H "git-password: $GIT_PASSWORD"\
+                                                -H "git-username: $GIT_USERNAME" -H "git-password: $GIT_PASSWORD" \
                                                 --insecure \
                                                 "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/import?" \
                                                 -d application-package-name=${zipFileName} \
-                                                -d application-name=$APP_NAME \ 
-                                                -d source=trusted-resource&adapter-name=$DMPS_TRUSTED_RESOURCE \
+                                                -d source=trusted-resource \
+                                                -d application-name=$APP_NAME \
+                                                -d adapter-name=$DMPS_TRUSTED_RESOURCE \
                                                 -d overwrite-application=$OVERWRITE_APPLCATION \
                                                 -d retain-labels=true \
                                                 -d auto-job-start=$JOB_AUTOSTART \
