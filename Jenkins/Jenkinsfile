@@ -133,7 +133,7 @@ pipeline {
             steps {
                 script{
                     echo "${zipFileName}"
-                    withCredentials([usernamePassword(credentialsId: 'client-secret', passwordVariable: 'GIT_USERNAME', usernameVariable: 'GIT_PASSWORD')]){
+                    withCredentials([usernamePassword(credentialsId: 'github-dmps-credentials', passwordVariable: 'GIT_USERNAME', usernameVariable: 'GIT_PASSWORD')]){
                         env.importResponse=sh([script: '''
                                     curl -H 'dmip-tenant-id: 2' -H "dmip-application-name: ${CLIENT_ID}" \
                                                 -X POST \
