@@ -103,7 +103,7 @@ pipeline {
                     timeout(time: 2, unit: 'MINUTES'){
                         waitUntil{
                             env.statusCheck= sh([script: '''
-                                    curl -H "dmip-tenant-id: 1' -H 'dmip-application-name: ${CLIENT_ID}" \
+                                    curl -H "dmip-tenant-id: 1" -H "dmip-application-name: ${CLIENT_ID}" \
                                                 -X GET \
                                                 -H "Authorization: Bearer $access_token" \
                                                 --insecure \
@@ -170,7 +170,7 @@ pipeline {
                     timeout(time: 2, unit: 'MINUTES'){
                         waitUntil{
                             env.statusCheck= sh([script: '''
-                                    curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
+                                    curl -H 'dmip-tenant-id: 1' -H "dmip-application-name: ${CLIENT_ID}" \
                                                 -X GET \
                                                 -H "Authorization: Bearer $access_token" \
                                                 --insecure \
