@@ -140,14 +140,7 @@ pipeline {
                                                 -H "Authorization: Bearer $access_token" -H "Content-Type: application/vnd.fico.dmip.v6.0+json"\
                                                 -H "git-username: $GIT_USERNAME" -H "git-password: $GIT_PASSWORD" \
                                                 --insecure \
-                                                "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/import?" \
-                                                -d "application-package-name=${zipFileName}" \
-                                                -d "application-name=${APP_NAME}" \
-                                                -d "source=trusted-resource" \
-                                                -d "adapter-name=$DMPS_TRUSTED_RESOURCE" \
-                                                -d "overwrite-application=$OVERWRITE_APPLCATION" \
-                                                -d "retain-labels=true" \
-                                                -d "auto-job-start=$JOB_AUTOSTART" \
+                                                "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/import?application-package-name=${zipFileName}&application-name=${APP_NAME}&source=trusted-resource&adapter-name=$DMPS_TRUSTED_RESOURCE&overwrite-application=$OVERWRITE_APPLCATION&retain-labels=true&auto-job-start=$JOB_AUTOSTART" 
                                                 ''', returnStdout: true]).trim()
                         env.appZipUuidTxtImport=sh([script: '''
                                         echo "${importResponse}" | jq -r ".appZipUuidTxt" 
