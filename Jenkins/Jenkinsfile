@@ -199,7 +199,7 @@ pipeline {
                                                     --insecure \
                                                     "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/import/${appZipUuidTxtImport}/status"
                                                     ''', returnStdout: true]).trim()
-                                def appZipStatus = sh(script: 'echo "${statusCheck}" | sed '(:a;N;$!ba;s/\n/\\n/g)' |  jq -r ".appZipStatus"', returnStdout: true).trim()
+                                def appZipStatus = sh(script: 'echo "${statusCheck}" |  jq ".appZipStatus"', returnStdout: true).trim()
                                 if (appZipStatus == "IMPORT_COMPLETED"){  
                                     return true
                                 }else {
@@ -210,7 +210,7 @@ pipeline {
                         }
                     }catch(err){
                         currentBuild.result = 'FAILURE'
-                        def statusMessage = sh(script: 'echo "${statusCheck}" | sed '(:a;N;$!ba;s/\n/\\n/g)'| jq -r ".statusMessage"', returnStdout: true).trim()
+                        def statusMessage = sh(script: 'echo "${statusCheck}" | jq ".statusMessage"', returnStdout: true).trim()
                         echo "Importing ${APP_NAME} failed:  ${err.getMessage()}"
                     }
                     
