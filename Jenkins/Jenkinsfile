@@ -18,98 +18,101 @@ pipeline {
             }
         }
 
-        // stage('SonarQube Analysis') {
-        //     steps {
-        //         withSonarQubeEnv('SonarQServer') {
-        //             sh '''
-        //                 mvn clean verify sonar:sonar -Dsonar.projectKey=DemoProjectSonarGithub -Dsonar.projectName='DemoProjectSonarGithub' -Dsonar.host.url=http://sonar:9000
-        //             '''
-        //             echo 'SonarQube Analysis Completed'
-        //         }
-        //     }
-        // }
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQServer') {
+                    sh '''
+                        mvn clean verify sonar:sonar -Dsonar.projectKey=DemoProjectSonarGithub -Dsonar.projectName='DemoProjectSonarGithub' -Dsonar.host.url=http://sonar:9000
+                    '''
+                    echo 'SonarQube Analysis Completed'
+                }
+            }
+        }
 
-        // stage('Token retrieval') {
-        //     steps {
-        //         withEnv(["CLIENT_ID=${params.CLIENT_ID}"]) {
-        //             withCredentials([string(credentialsId: 'client-secret', variable: 'CLIENT_SECRET')]){
-        //                 script{
-        //                     env.responseAuth=sh([script: '''
-        //                                     bodyAuth="grant_type=client_credentials"
-        //                                     curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
-        //                                             -X POST \
-        //                                             -u "${CLIENT_ID}:${CLIENT_SECRET}" \
-        //                                             -d "$bodyAuth" \
-        //                                             --insecure \
-        //                                             "$TOKEN_URL"
-        //                                             ''', returnStdout: true]).trim()
-        //                     env.access_token=sh([script: '''
-        //                                     echo "${responseAuth}" > response.json
-        //                                     jq -r ".access_token" response.json
-        //                                     ''', returnStdout: true]).trim()
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Token retrieval') {
+            steps {
+                withEnv(["CLIENT_ID=${params.CLIENT_ID}"]) {
+                    withCredentials([string(credentialsId: 'client-secret', variable: 'CLIENT_SECRET')]){
+                        script{
+                            env.access_token=sh([script: '''
+                                            bodyAuth="grant_type=client_credentials"
+                                            responseAuth=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
+                                                    -X POST \
+                                                    -u "${CLIENT_ID}:${CLIENT_SECRET}" \
+                                                    -d "$bodyAuth" \
+                                                    --insecure \
+                                                    "$TOKEN_URL")
+                                            echo "${responseAuth}" > response.json
+                                            jq -r ".access_token" response.json
+                                            ''', returnStdout: true]).trim()
+                        }
+                    }
+                }
+            }
+        }
 
-        // stage('List All Eligible Applications') {
-        //     steps {
-        //         script{
-        //             env.listApplication=sh([script: '''
-        //                             curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
-        //                                     -X GET \
-        //                                     -H "Authorization: Bearer $access_token" \
-        //                                     --insecure \
-        //                                     "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15"
-        //                                     ''', returnStdout: true]).trim()
-        //             def application = env.listApplication.findAll { app ->
-        //                     app.toString().toLowerCase().contains(APP_NAME.toLowerCase())
-        //             }                    
-        //             if(application == null){
-        //                 currentBuild.result = 'FAILURE'
-        //                 error("${APP_NAME} was not found as an eligible promotion application")
-        //             }
-        //         }
-        //         echo "${listApplication}"
-        //     }
-        // }
+        stage('List All Eligible Applications') {
+            steps {
+                script{
+                    env.listApplication=sh([script: '''
+                                    curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
+                                            -X GET \
+                                            -H "Authorization: Bearer $access_token" \
+                                            --insecure \
+                                            "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15"
+                                            ''', returnStdout: true]).trim()
+                    def application = env.listApplication.findAll { app ->
+                            app.toString().toLowerCase().contains(APP_NAME.toLowerCase())
+                    }                    
+                    if(application == null){
+                        currentBuild.result = 'FAILURE'
+                        error("${APP_NAME} was not found as an eligible promotion application")
+                    }
+                }
+                echo "${listApplication}"
+            }
+        }
 
-        // stage("Export ${APP_NAME} Application") {
-        //     steps {
-        //             script{
-        //                 env.exportResponse=sh([script: '''
-        //                                 curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
-        //                                         -X POST \
-        //                                         -H "Authorization: Bearer $access_token" -H "Content-Type: application/vnd.fico.dmip.v6.0+json"\
-        //                                         --insecure \
-        //                                         "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export?application-name=$APP_NAME&destination=trusted-resource&adapter-name=$DMPSTrustedResource" \
-        //                                         -w '%{http_code}'
-        //                                         ''', returnStdout: true]).trim()
-        //                 env.appZipUuidTxt=sh([script: '''
-        //                                 echo "${exportResponse}" | jq -r ".appZipUuidTxt" 
-        //                                 ''', returnStdout: true]).trim()
-        //                 statusCode=sh([script: '''
-        //                                 echo "${exportResponse}" | jq -r ".statusCode" 
-        //                                 ''', returnStdout: true]).trim()
-        //                 if(statusCode != 200 || statusCode != 202){
-        //                 currentBuild.result = 'FAILURE'
-        //                 error("There was a problem exporting ${APP_NAME} application")
-        //                 }
-        //             }
-        //             echo "${appZipUuidTxt}"
-        //     }
-        // }
+        stage("Export ${APP_NAME} Application") {
+            steps {
+                    script{
+                        env.exportResponse=sh([script: '''
+                                        curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
+                                                -X POST \
+                                                -H "Authorization: Bearer $access_token" -H "Content-Type: application/vnd.fico.dmip.v6.0+json"\
+                                                --insecure \
+                                                "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export?application-name=$APP_NAME&destination=trusted-resource&adapter-name=$DMPS_TRUSTED_RESOURCE" \
+                                                -w '%{http_code}'
+                                                ''', returnStdout: true]).trim()
+                        env.appZipUuidTxt=sh([script: '''
+                                        echo "${exportResponse}" | jq -r ".appZipUuidTxt" 
+                                        ''', returnStdout: true]).trim()
+                        statusCode=sh([script: '''
+                                        echo "${exportResponse}" | jq -r ".statusCode" 
+                                        ''', returnStdout: true]).trim()
+                        if(statusCode != 200 || statusCode != 202){
+                        currentBuild.result = 'FAILURE'
+                        error("There was a problem exporting ${APP_NAME} application")
+                        }
+                    }
+                    echo "${appZipUuidTxt}"
+            }
+        }
         
 
         stage('Check status on Export $APP_NAME process') {
             steps {
                 script{
                     waitUntil{
-                        env.statusCheck= sh(script: '''
-                        curl -s -X GET https://run.mocky.io/v3/aea9421b-ea63-43a8-a563-05f1ad7bc5ff
-                        ''', returnStdout: true).trim()
+                        env.statusCheck= sh([script: '''
+                                curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
+                                             -X GET \
+                                             -H "Authorization: Bearer $access_token" \
+                                             --insecure \
+                                             "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export/${appZipUuidTxt}/status"
+                                             ''', returnStdout: true]).trim()
                         def appZipStatus = sh(script: 'echo "${statusCheck}" | jq -r ".appZipStatus"', returnStdout: true).trim()
+
                         if (appZipStatus == "UPLOADED"){
                             env.zipFileName=sh(script: '''
                                 statusMessage=$(echo "${statusCheck}" | jq -r ".statusMessage") 
@@ -122,18 +125,6 @@ pipeline {
                         }
                     }
                     echo "${zipFileName}"
-                    // env.exportStatus=sh([script: '''
-                    //                 curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
-                    //                         -X GET \
-                    //                         -H "Authorization: Bearer $access_token" \
-                    //                         --insecure \
-                    //                         "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export/${appZipUuidTxt}/status"
-                    //                         ''', returnStdout: true]).trim()
-                    // application = $listApplication.filter((application) => JSON.stringify(application).toLowerCase().includes($APP_NAME.toLowerCase()))
-                    // if(application == null){
-                    //     currentBuild.result = 'FAILURE'
-                    //     error("${APP_NAME} was not found as an eligible promotion application")
-                    // }
                 }
             }
         }
@@ -141,12 +132,65 @@ pipeline {
         stage('IMPORT') {
             steps {
                 script{
-                       echo "${zipFileName}"
-                
-                    }
-                    }
-                    }
+                    echo "${zipFileName}"
+                    withCredentials([usernamePassword(credentialsId: 'client-secret', passwordVariable: 'GIT_USERNAME', usernameVariable: 'GIT_PASSWORD')]){
+                        env.importResponse=sh([script: '''
+                                    curl -H 'dmip-tenant-id: 2' -H 'dmip-application-name: $CLIENT_ID' \
+                                                -X POST \
+                                                -H "Authorization: Bearer $access_token" -H "Content-Type: application/vnd.fico.dmip.v6.0+json"\
+                                                -H "git-username: $GIT_USERNAME" -H "git-password: $GIT_PASSWORD"\
+                                                --insecure \
+                                                "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/import?" \
+                                                -d application-package-name=${zipFileName} \
+                                                -d application-name=$APP_NAME \ 
+                                                -d source=trusted-resource&adapter-name=$DMPS_TRUSTED_RESOURCE \
+                                                -d overwrite-application=$OVERWRITE_APPLCATION \
+                                                -d retain-labels=true \
+                                                -d auto-job-start=$JOB_AUTOSTART \
+                                                -w '%{http_code}'
+                                                ''', returnStdout: true]).trim()
+                        env.appZipUuidTxt=sh([script: '''
+                                        echo "${importResponse}" | jq -r ".appZipUuidTxt" 
+                                        ''', returnStdout: true]).trim()
+                        statusCode=sh([script: '''
+                                        echo "${importResponse}" | jq -r ".statusCode" 
+                                        ''', returnStdout: true]).trim()
+                        if(statusCode != 200 || statusCode != 202){
+                        currentBuild.result = 'FAILURE'
+                        error("There was a problem importing ${APP_NAME} application")
+                        }
+                    }    
+                }
+            }
+        }
 
-        
+        stage('Check status on Import $APP_NAME process') {
+            steps {
+                script{
+                    waitUntil{
+                        env.statusCheck= sh([script: '''
+                                curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
+                                             -X GET \
+                                             -H "Authorization: Bearer $access_token" \
+                                             --insecure \
+                                             "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export/${appZipUuidTxt}/status"
+                                             ''', returnStdout: true]).trim()
+                        def appZipStatus = sh(script: 'echo "${statusCheck}" | jq -r ".appZipStatus"', returnStdout: true).trim()
+
+                        if (appZipStatus == "UPLOADED"){
+                            env.zipFileName=sh(script: '''
+                                statusMessage=$(echo "${statusCheck}" | jq -r ".statusMessage") 
+                                echo "${statusMessage}" | grep -oP "'[^']+\\.zip'" | sed "s/'//g" 
+                                ''', returnStdout: true).trim()
+                            return true
+                        }else {
+                            sleep(15)
+                            return false
+                        }
+                    }
+                    echo "${zipFileName}"
+                }
+            }
+        }
     }
 }
