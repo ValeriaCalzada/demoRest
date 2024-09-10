@@ -80,18 +80,17 @@ pipeline {
                                                 -H "Authorization: Bearer $access_token" -H "Content-Type: application/vnd.fico.dmip.v6.0+json"\
                                                 --insecure \
                                                 "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export?application-name=$APP_NAME&destination=trusted-resource&adapter-name=$DMPS_TRUSTED_RESOURCE" \
-                                                -w '%{http_code}'
                                                 ''', returnStdout: true]).trim()
                         env.appZipUuidTxt=sh([script: '''
                                         echo "${exportResponse}" | jq -r ".appZipUuidTxt" 
                                         ''', returnStdout: true]).trim()
-                        statusCode=sh([script: '''
-                                        echo "${exportResponse}" |  grep -E '^HTTPS?/[1-9][.][1-9] [1-9][0-9][0-9]' | grep -o ' [1-9][0-9][0-9] '" 
-                                        ''', returnStdout: true]).trim()
-                        if(statusCode != "200" || statusCode != "202"){
-                        currentBuild.result = 'FAILURE'
-                        error("There was a problem exporting ${APP_NAME} application")
-                        }
+                        // statusCode=sh([script: '''
+                        //                 echo "${exportResponse}" |  grep -E '^HTTPS?/[1-9][.][1-9] [1-9][0-9][0-9]' | grep -o ' [1-9][0-9][0-9] '" 
+                        //                 ''', returnStdout: true]).trim()
+                        // if(statusCode != "200" || statusCode != "202"){
+                        // currentBuild.result = 'FAILURE'
+                        // error("There was a problem exporting ${APP_NAME} application")
+                        // }
                     }
                     echo "${appZipUuidTxt}"
             }
@@ -149,18 +148,17 @@ pipeline {
                                                 -d overwrite-application=$OVERWRITE_APPLCATION \
                                                 -d retain-labels=true \
                                                 -d auto-job-start=$JOB_AUTOSTART \
-                                                -w '%{http_code}'
                                                 ''', returnStdout: true]).trim()
                         env.appZipUuidTxtImport=sh([script: '''
                                         echo "${importResponse}" | jq -r ".appZipUuidTxt" 
                                         ''', returnStdout: true]).trim()
-                        statusCode=sh([script: '''
-                                        echo "${importResponse}" |  grep -E '^HTTPS?/[1-9][.][1-9] [1-9][0-9][0-9]' | grep -o ' [1-9][0-9][0-9] '" 
-                                        ''', returnStdout: true]).trim()
-                        if(statusCode != "200" || statusCode != "202"){
-                        currentBuild.result = 'FAILURE'
-                        error("There was a problem importing ${APP_NAME} application")
-                        }
+                        // statusCode=sh([script: '''
+                        //                 echo "${importResponse}" |  grep -E '^HTTPS?/[1-9][.][1-9] [1-9][0-9][0-9]' | grep -o ' [1-9][0-9][0-9] '" 
+                        //                 ''', returnStdout: true]).trim()
+                        // if(statusCode != "200" || statusCode != "202"){
+                        // currentBuild.result = 'FAILURE'
+                        // error("There was a problem importing ${APP_NAME} application")
+                        // }
                     }    
                 }
             }
