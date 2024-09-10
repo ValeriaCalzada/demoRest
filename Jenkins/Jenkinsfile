@@ -53,7 +53,7 @@ pipeline {
             steps {
                 script{
                     env.listApplication=sh([script: '''
-                                    curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
+                                    curl -H 'dmip-tenant-id: 1' -H "dmip-application-name: ${CLIENT_ID}" \
                                             -X GET \
                                             -H "Authorization: Bearer $access_token" \
                                             --insecure \
@@ -75,7 +75,7 @@ pipeline {
             steps {
                     script{
                         env.exportResponse=sh([script: '''
-                                        curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
+                                        curl -H 'dmip-tenant-id: 1' -H "dmip-application-name: ${CLIENT_ID}" \
                                                 -X POST \
                                                 -H "Authorization: Bearer $access_token" -H "Content-Type: application/vnd.fico.dmip.v6.0+json"\
                                                 --insecure \
@@ -86,9 +86,9 @@ pipeline {
                                         echo "${exportResponse}" | jq -r ".appZipUuidTxt" 
                                         ''', returnStdout: true]).trim()
                         statusCode=sh([script: '''
-                                        echo "${exportResponse}" | jq -r ".statusCode" 
+                                        echo "${exportResponse}" |  grep -E '^HTTPS?/[1-9][.][1-9] [1-9][0-9][0-9]' | grep -o ' [1-9][0-9][0-9] '" 
                                         ''', returnStdout: true]).trim()
-                        if(statusCode != 200 || statusCode != 202){
+                        if(statusCode != "200" || statusCode != "202"){
                         currentBuild.result = 'FAILURE'
                         error("There was a problem exporting ${APP_NAME} application")
                         }
@@ -104,7 +104,7 @@ pipeline {
                     timeout(time: 2, unit: 'MINUTES'){
                         waitUntil{
                             env.statusCheck= sh([script: '''
-                                    curl -H 'dmip-tenant-id: 1' -H 'dmip-application-name: $CLIENT_ID' \
+                                    curl -H "dmip-tenant-id: 1' -H 'dmip-application-name: ${CLIENT_ID}" \
                                                 -X GET \
                                                 -H "Authorization: Bearer $access_token" \
                                                 --insecure \
@@ -136,7 +136,7 @@ pipeline {
                     echo "${zipFileName}"
                     withCredentials([usernamePassword(credentialsId: 'client-secret', passwordVariable: 'GIT_USERNAME', usernameVariable: 'GIT_PASSWORD')]){
                         env.importResponse=sh([script: '''
-                                    curl -H 'dmip-tenant-id: 2' -H 'dmip-application-name: $CLIENT_ID' \
+                                    curl -H 'dmip-tenant-id: 2' -H "dmip-application-name: ${CLIENT_ID}" \
                                                 -X POST \
                                                 -H "Authorization: Bearer $access_token" -H "Content-Type: application/vnd.fico.dmip.v6.0+json"\
                                                 -H "git-username: $GIT_USERNAME" -H "git-password: $GIT_PASSWORD" \
