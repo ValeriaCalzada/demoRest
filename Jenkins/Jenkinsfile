@@ -75,8 +75,8 @@ pipeline {
                                             "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15")
                                             echo "${listResponse}" |  jq -r ".data" 
                                             ''', returnStdout: true]).trim()
-                        println(env.APP_NAME)
                         def application = env.listApplication.findAll { app ->
+                                println(app)
                                 app.toString().toLowerCase().contains(env.APP_NAME.toLowerCase())
                         }
                         println(application)                    
