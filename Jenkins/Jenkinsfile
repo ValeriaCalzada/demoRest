@@ -199,13 +199,13 @@ pipeline {
                                                     --insecure \
                                                     "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/import/${appZipUuidTxtImport}/status"
                                                     ''', returnStdout: true]).trim()
-                                def appZipStatus = sh(script: '''echo "${statusCheck}" | tr '\n' ' ' |  jq ".appZipStatus"''', returnStdout: true).trim()
-                                if (appZipStatus == "IMPORT_COMPLETED"){  
-                                    return true
-                                }else {
-                                    def statusCode=sh([script: '''
+                                //def appZipStatus = sh(script: '''echo "${statusCheck}" | tr '\n' ' ' |  jq ".appZipStatus"''', returnStdout: true).trim()
+                                def statusCode=sh([script: '''
                                         echo "${statusCheck}" | jq -r ".statusCode" 
                                         ''', returnStdout: true]).trim()
+                                if (statusCode == "200"){  
+                                    return true
+                                }else {
                                     if(statusCode == "400" || statusCode == "500"){
                                         throw new Exception()
                                     }
