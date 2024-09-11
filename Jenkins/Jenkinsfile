@@ -78,7 +78,7 @@ pipeline {
                                 app.toString().toLowerCase().contains(APP_NAME.toLowerCase())
                         }
                         println(application)                    
-                        if(application == null){
+                        if(application == null || application.length < 1){
                             currentBuild.result = 'FAILURE'
                             error("${APP_NAME} was not found as an eligible promotion application")
                         }
