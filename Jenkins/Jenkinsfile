@@ -46,6 +46,8 @@ pipeline {
                                         echo "${responseAuth}" > response.json
                                         jq -r -e ".access_token" response.json || exit 1
                                         ''', returnStdout: true]).trim()
+                            if(env.access_token == null)
+                                throw new Exception()
                         }catch(err){
                             currentBuild.result = 'FAILURE'
                             //def statusMessage = sh(script: 'echo "${listApplication}" | jq -r ".errorMessage"', returnStdout: true).trim()
