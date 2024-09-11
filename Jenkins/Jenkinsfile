@@ -55,7 +55,7 @@ pipeline {
                         }catch(err){
                             currentBuild.result = 'FAILURE'
                             //def statusMessage = sh(script: 'echo "${listApplication}" | jq -r ".errorMessage"', returnStdout: true).trim()
-                            echo "response.json"
+                            sh "cat response.json"
                             error "Retrieving token for ${APP_NAME} failed"
                         }
                         
