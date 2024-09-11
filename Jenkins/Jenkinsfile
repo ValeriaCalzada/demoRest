@@ -34,19 +34,21 @@ pipeline {
                 withCredentials([string(credentialsId: 'client-secret', variable: 'CLIENT_SECRET')]){
                     script{
                         try{
-                            env.access_token=sh([script: '''
+                            env.authResponse=sh([script: '''
                                         bodyAuth="grant_type=client_credentials"
-                                        responseAuth=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
+                                        curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
                                                 -X POST \
                                                 -u "${CLIENT_ID}:${CLIENT_SECRET}" \
                                                 -d "$bodyAuth" \
                                                 --insecure \
                                                 "$TOKEN_URL" \
-                                                -sw '{"statusCode":"%{http_code}"}')
-                                        echo "${responseAuth}" > response.json
-                                        jq -r -e ".access_token" response.json || exit 1
+                                                -sw '{"statusCode":"%{http_code}"}'
                                         ''', returnStdout: true]).trim()
-                            if(env.access_token == null)
+                            env.access_token = sh([script: ''' 
+                                                    echo "${authResponse}" > response.json
+                                                    jq -r -e ".access_token" response.json ''', returnStdout: true]).trim()
+                            def statusCode = sh([script: ''' echo "${authResponse}" | jq -r -e ".statusCode" ''', returnStdout: true]).trim()
+                            if(statusCode != "200")
                                 throw new Exception()
                         }catch(err){
                             currentBuild.result = 'FAILURE'
