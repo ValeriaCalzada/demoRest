@@ -63,7 +63,7 @@ pipeline {
             }
         }
 
-        stage('List All Eligible Applications') {
+        stage('Check if Application is elegible for promotion') {
             steps {
                 script{
                     try{
@@ -85,11 +85,12 @@ pipeline {
                     }catch(err){
                         currentBuild.result = 'FAILURE'
                         //def statusMessage = sh(script: 'echo "${listApplication}" | jq -r ".errorMessage"', returnStdout: true).trim()
-                        error "Listing eligible applications  ${APP_NAME} failed: ${listApplication}"
+                        error "Application ${APP_NAME} was not found on the list of elegible applications. List of elegible applications: ${listApplication}"
                     } 
                 }
             }
         }
+
 
         stage('Export Application') {
             steps {
