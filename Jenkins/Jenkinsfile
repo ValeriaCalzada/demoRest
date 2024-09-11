@@ -41,7 +41,8 @@ pipeline {
                                                 -u "${CLIENT_ID}:${CLIENT_SECRET}" \
                                                 -d "$bodyAuth" \
                                                 --insecure \
-                                                "$TOKEN_URL")
+                                                "$TOKEN_URL" \
+                                                -w '{http%}')
                                         echo "${responseAuth}" > response.json
                                         jq -r ".access_token" response.json
                                         ''', returnStdout: true]).trim()
