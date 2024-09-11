@@ -55,6 +55,7 @@ pipeline {
                         }catch(err){
                             currentBuild.result = 'FAILURE'
                             //def statusMessage = sh(script: 'echo "${listApplication}" | jq -r ".errorMessage"', returnStdout: true).trim()
+                            echo "response.json"
                             error "Retrieving token for ${APP_NAME} failed"
                         }
                         
@@ -82,7 +83,6 @@ pipeline {
                         }
                     }catch(err){
                         currentBuild.result = 'FAILURE'
-                        //def statusMessage = sh(script: 'echo "${listApplication}" | jq -r ".errorMessage"', returnStdout: true).trim()
                         error "Application ${APP_NAME} was not found on the list of elegible applications. List of elegible applications: ${listApplication}"
                     } 
                 }
