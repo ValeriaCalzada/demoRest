@@ -76,7 +76,8 @@ pipeline {
                                             ''', returnStdout: true]).trim()
                         def application = env.listApplication.findAll { app ->
                                 app.toString().toLowerCase().contains(APP_NAME.toLowerCase())
-                        }                    
+                        }
+                        println(application)                    
                         if(application == null){
                             currentBuild.result = 'FAILURE'
                             error("${APP_NAME} was not found as an eligible promotion application")
