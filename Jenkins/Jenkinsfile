@@ -74,6 +74,7 @@ pipeline {
                                             --insecure \
                                             "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15"
                                             ''', returnStdout: true]).trim()
+                        println(env.listApplication)
                         def application = env.listApplication.findAll { app ->
                                 app.toString().toLowerCase().contains(env.APP_NAME.toLowerCase())
                         }
