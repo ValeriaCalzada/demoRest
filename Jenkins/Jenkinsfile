@@ -42,7 +42,7 @@ pipeline {
                                                 -d "$bodyAuth" \
                                                 --insecure \
                                                 "$TOKEN_URL" \
-                                                -sw '%{http_code}')
+                                                -sw 'statusCode:%{http_code}')
                                         echo "${responseAuth}" > response.json
                                         jq -r ".access_token" response.json
                                         ''', returnStdout: true]).trim()
