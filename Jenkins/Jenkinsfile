@@ -83,7 +83,7 @@ pipeline {
             }
         }
 
-        stage('Export ${APP_NAME} Application') {
+        stage('Export Application') {
             steps {
                 script{
                     try{
@@ -95,27 +95,19 @@ pipeline {
                                             "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export?application-name=$APP_NAME&destination=trusted-resource&adapter-name=$DMPS_TRUSTED_RESOURCE" \
                                             ''', returnStdout: true]).trim()
                         env.appZipUuidTxt=sh([script: '''
-                                    echo "${exportResponse}" | jq -r ".appZipUuidTxt" 
+                                    echo "${exportResponse}" | tr "\n' ' " | jq -r ".appZipUuidTxt" 
                                     ''', returnStdout: true]).trim()
                     }catch(err){
                         currentBuild.result = 'FAILURE'
-                        def statusMessage = sh(script: 'echo "${importResponse}" | jq -r ".errorMessage"', returnStdout: true).trim()
+                        def statusMessage = sh(script: 'echo "${exportResponse}" | tr "\n' ' " | jq -r ".errorMessage"', returnStdout: true).trim()
                         echo "Exporting ${APP_NAME} failed:  ${statusMessage}"
                     }
-                    
-                    // statusCode=sh([script: '''
-                    //                 echo "${exportResponse}" |  grep -E '^HTTPS?/[1-9][.][1-9] [1-9][0-9][0-9]' | grep -o ' [1-9][0-9][0-9] '" 
-                    //                 ''', returnStdout: true]).trim()
-                    // if(statusCode != "200" || statusCode != "202"){
-                    // currentBuild.result = 'FAILURE'
-                    // error("There was a problem exporting ${APP_NAME} application")
-                    // }
                 }
             }
         }
         
 
-        stage('Check status on Export $APP_NAME process') {
+        stage('Check status on Export process') {
             steps {
                 script{
                     try{
@@ -128,7 +120,7 @@ pipeline {
                                                     --insecure \
                                                     "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export/${appZipUuidTxt}/status"
                                                     ''', returnStdout: true]).trim()
-                                def appZipStatus = sh(script: 'echo "${statusCheck}" | jq -r ".appZipStatus"', returnStdout: true).trim()
+                                def appZipStatus = sh(script: 'echo "${statusCheck}" | tr "\n' ' " | jq -r ".appZipStatus"', returnStdout: true).trim()
                                 if (appZipStatus == "UPLOADED"){
                                     env.zipFileName=sh(script: '''
                                         statusMessage=$(echo "${statusCheck}" | jq -r ".statusMessage") 
@@ -143,7 +135,7 @@ pipeline {
                         } 
                     }catch(err){
                         currentBuild.result = 'FAILURE'
-                        def statusMessage = sh(script: 'echo "${statusCheck}" | jq -r ".statusMessage"', returnStdout: true).trim()
+                        def statusMessage = sh(script: 'echo "${statusCheck}" | tr "\n' ' " | jq -r ".statusMessage"', returnStdout: true).trim()
                         echo "Exporting ${APP_NAME} failed:  ${statusMessage}"
                     }
                                        
@@ -151,7 +143,7 @@ pipeline {
             }
         }
 
-        stage('IMPORT') {
+        stage('Import Application') {
             steps {
                 script{
                     try{
@@ -165,28 +157,19 @@ pipeline {
                                                 "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/import?application-package-name=${zipFileName}&application-name=${APP_NAME}&source=trusted-resource&adapter-name=$DMPS_TRUSTED_RESOURCE&overwrite-application=$OVERWRITE_APPLCATION&retain-labels=true&auto-job-start=$JOB_AUTOSTART" 
                                                 ''', returnStdout: true]).trim()
                         env.appZipUuidTxtImport=sh([script: '''
-                                        echo "${importResponse}" | jq -r ".appZipUuidTxt" 
+                                        echo "${importResponse}" | tr "\n' ' " | jq -r ".appZipUuidTxt" 
                                         ''', returnStdout: true]).trim()
                         }
                     }catch(err){
                         currentBuild.result = 'FAILURE'
-                        def statusMessage = sh(script: 'echo "${importResponse}" | jq -r ".errorMessage"', returnStdout: true).trim()
+                        def statusMessage = sh(script: 'echo "${importResponse}" | tr "\n' ' " | jq -r ".errorMessage"', returnStdout: true).trim()
                         echo "Importing ${APP_NAME} failed:  ${statusMessage}"
-                    }
-                    
-                        // statusCode=sh([script: '''
-                        //                 echo "${importResponse}" |  grep -E '^HTTPS?/[1-9][.][1-9] [1-9][0-9][0-9]' | grep -o ' [1-9][0-9][0-9] '" 
-                        //                 ''', returnStdout: true]).trim()
-                        // if(statusCode != "200" || statusCode != "202"){
-                        // currentBuild.result = 'FAILURE'
-                        // error("There was a problem importing ${APP_NAME} application")
-                        // }
-                        
+                    }   
                 }
             }
         }
 
-        stage('Check status on Import $APP_NAME process') {
+        stage('Check status on Import process') {
             steps {
                 script{
                     try{
@@ -201,7 +184,7 @@ pipeline {
                                                     ''', returnStdout: true]).trim()
                                 //def appZipStatus = sh(script: '''echo "${statusCheck}" | tr '\n' ' ' |  jq ".appZipStatus"''', returnStdout: true).trim()
                                 def statusCode=sh([script: '''
-                                        echo "${statusCheck}" | jq -r ".statusCode" 
+                                        echo "${statusCheck}" | tr '\n' ' ' | jq -r ".statusCode" 
                                         ''', returnStdout: true]).trim()
                                 if (statusCode == "200"){  
                                     return true
