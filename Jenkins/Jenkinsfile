@@ -48,6 +48,7 @@ pipeline {
                                                     echo "${authResponse}" > response.json
                                                     jq -r ".access_token" response.json ''', returnStdout: true]).trim()
                             def statusCode = sh([script: ''' echo "${authResponse}" | jq -r ".statusCode" ''', returnStdout: true]).trim()
+                            println(statusCode)
                             if(statusCode != "200")
                                 throw new Exception()
                         }catch(err){
