@@ -99,7 +99,7 @@ pipeline {
                                     ''', returnStdout: true]).trim()
                     }catch(err){
                         currentBuild.result = 'FAILURE'
-                        def statusMessage = sh(script: 'echo "${exportResponse}" | tr "\n' ' " | jq -r ".errorMessage"', returnStdout: true).trim()
+                        def statusMessage = sh(script: 'echo "${exportResponse}" | tr "\n" " " | jq -r ".errorMessage"', returnStdout: true).trim()
                         echo "Exporting ${APP_NAME} failed:  ${statusMessage}"
                     }
                 }
@@ -120,7 +120,7 @@ pipeline {
                                                     --insecure \
                                                     "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export/${appZipUuidTxt}/status"
                                                     ''', returnStdout: true]).trim()
-                                def appZipStatus = sh(script: 'echo "${statusCheck}" | tr "\n' ' " | jq -r ".appZipStatus"', returnStdout: true).trim()
+                                def appZipStatus = sh(script: 'echo "${statusCheck}" | tr "\n" " " | jq -r ".appZipStatus"', returnStdout: true).trim()
                                 if (appZipStatus == "UPLOADED"){
                                     env.zipFileName=sh(script: '''
                                         statusMessage=$(echo "${statusCheck}" | jq -r ".statusMessage") 
@@ -135,7 +135,7 @@ pipeline {
                         } 
                     }catch(err){
                         currentBuild.result = 'FAILURE'
-                        def statusMessage = sh(script: 'echo "${statusCheck}" | tr "\n' ' " | jq -r ".statusMessage"', returnStdout: true).trim()
+                        def statusMessage = sh(script: 'echo "${statusCheck}" | tr "\n" " " | jq -r ".statusMessage"', returnStdout: true).trim()
                         echo "Exporting ${APP_NAME} failed:  ${statusMessage}"
                     }
                                        
@@ -162,7 +162,7 @@ pipeline {
                         }
                     }catch(err){
                         currentBuild.result = 'FAILURE'
-                        def statusMessage = sh(script: 'echo "${importResponse}" | tr "\n' ' " | jq -r ".errorMessage"', returnStdout: true).trim()
+                        def statusMessage = sh(script: 'echo "${importResponse}" | tr "\n" " " | jq -r ".errorMessage"', returnStdout: true).trim()
                         echo "Importing ${APP_NAME} failed:  ${statusMessage}"
                     }   
                 }
