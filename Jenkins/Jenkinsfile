@@ -75,10 +75,8 @@ pipeline {
                                             "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15")
                                             echo "${listResponse}" |  jq -r ".data" 
                                             ''', returnStdout: true]).trim()
-                        def application = env.listApplication.each { app ->
-                        println(app)                    
-                        }
-                        if(application == null || application.length < 1){
+                        
+                        if(!env.listApplication.toLowerCase().contains(env.APP_NAME.toLowerCase())){
                             currentBuild.result = 'FAILURE'
                             error("${APP_NAME} was not found as an eligible promotion application")
                         }
