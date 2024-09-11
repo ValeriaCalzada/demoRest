@@ -46,14 +46,14 @@ pipeline {
                                         ''', returnStdout: true]).trim()
                             env.access_token = sh([script: ''' 
                                                     echo "${authResponse}" > response.json
-                                                    jq -r -e ".access_token" response.json ''', returnStdout: true]).trim()
-                            def statusCode = sh([script: ''' echo "${authResponse}" | jq -r -e ".statusCode" ''', returnStdout: true]).trim()
+                                                    jq -r ".access_token" response.json ''', returnStdout: true]).trim()
+                            def statusCode = sh([script: ''' echo "${authResponse}" | jq -r ".statusCode" ''', returnStdout: true]).trim()
                             if(statusCode != "200")
                                 throw new Exception()
                         }catch(err){
                             currentBuild.result = 'FAILURE'
                             //def statusMessage = sh(script: 'echo "${listApplication}" | jq -r ".errorMessage"', returnStdout: true).trim()
-                            error "Retrieving token for ${APP_NAME} failed: "
+                            error "Retrieving token for ${APP_NAME} failed: ${access_token}"
                         }
                         
                     }
