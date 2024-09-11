@@ -44,7 +44,7 @@ pipeline {
                                                 "$TOKEN_URL" \
                                                 -sw '{"statusCode":"%{http_code}"}')
                                         echo "${responseAuth}" > response.json
-                                        jq -r -e ".access_token" response.json
+                                        jq -r -e ".access_token" response.json || exit 1
                                         ''', returnStdout: true]).trim()
                         }catch(err){
                             currentBuild.result = 'FAILURE'
