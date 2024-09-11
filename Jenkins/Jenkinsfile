@@ -36,25 +36,26 @@ pipeline {
                         try{
                             env.authResponse=sh([script: '''
                                         bodyAuth="grant_type=client_credentials"
-                                        curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
+                                        responseAuth=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
                                                 -X POST \
                                                 -u "${CLIENT_ID}:${CLIENT_SECRET}" \
                                                 -d "$bodyAuth" \
                                                 --insecure \
-                                                "$TOKEN_URL" \
-                                                -sw '{"statusCode":"%{http_code}"}'
+                                                "$TOKEN_URL")
+                                        echo "${responseAuth}" > response.json
+                                        jq 'has("access_token")' response.json 
                                         ''', returnStdout: true]).trim()
-                            env.access_token = sh([script: ''' 
-                                                    echo "${authResponse}" > response.json
+                            if(authResponse == "true")
+                                env.access_token = sh([script: ''' 
                                                     jq -r ".access_token" response.json ''', returnStdout: true]).trim()
-                            def statusCode = sh([script: ''' echo "${authResponse}" | jq -r ".statusCode" ''', returnStdout: true]).trim()
-                            println(statusCode)
-                            if(statusCode != "200")
+                            //def statusCode = sh([script: ''' echo "${authResponse}" | jq -r ".statusCode" ''', returnStdout: true]).trim()
+                            //println(statusCode)
+                            else
                                 throw new Exception()
                         }catch(err){
                             currentBuild.result = 'FAILURE'
                             //def statusMessage = sh(script: 'echo "${listApplication}" | jq -r ".errorMessage"', returnStdout: true).trim()
-                            error "Retrieving token for ${APP_NAME} failed: ${access_token}"
+                            error "Retrieving token for ${APP_NAME} failed"
                         }
                         
                     }
