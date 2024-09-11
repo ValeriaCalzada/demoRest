@@ -51,7 +51,7 @@ pipeline {
                         }catch(err){
                             currentBuild.result = 'FAILURE'
                             //def statusMessage = sh(script: 'echo "${listApplication}" | jq -r ".errorMessage"', returnStdout: true).trim()
-                            echo "Retrieving token for ${APP_NAME} failed: "
+                            error "Retrieving token for ${APP_NAME} failed: "
                         }
                         
                     }
@@ -80,7 +80,7 @@ pipeline {
                     }catch(err){
                         currentBuild.result = 'FAILURE'
                         //def statusMessage = sh(script: 'echo "${listApplication}" | jq -r ".errorMessage"', returnStdout: true).trim()
-                        echo "Listing eligible applications  ${APP_NAME} failed: ${listApplication}"
+                        error "Listing eligible applications  ${APP_NAME} failed: ${listApplication}"
                     } 
                 }
             }
@@ -103,7 +103,7 @@ pipeline {
                     }catch(err){
                         currentBuild.result = 'FAILURE'
                         def statusMessage = sh(script: 'echo "${exportResponse}" | tr "\n" " " | jq -r ".errorMessage"', returnStdout: true).trim()
-                        echo "Exporting ${APP_NAME} failed:  ${statusMessage}"
+                        error "Exporting ${APP_NAME} failed:  ${statusMessage}"
                     }
                 }
             }
@@ -139,7 +139,7 @@ pipeline {
                     }catch(err){
                         currentBuild.result = 'FAILURE'
                         def statusMessage = sh(script: 'echo "${statusCheck}" | tr "\n" " " | jq -r ".statusMessage"', returnStdout: true).trim()
-                        echo "Exporting ${APP_NAME} failed:  ${statusMessage}"
+                        error "Exporting ${APP_NAME} failed:  ${statusMessage}"
                     }
                                        
                 }
@@ -166,7 +166,7 @@ pipeline {
                     }catch(err){
                         currentBuild.result = 'FAILURE'
                         def statusMessage = sh(script: 'echo "${importResponse}" | tr "\n" " " | jq -r ".errorMessage"', returnStdout: true).trim()
-                        echo "Importing ${APP_NAME} failed:  ${statusMessage}"
+                        error "Importing ${APP_NAME} failed:  ${statusMessage}"
                     }   
                 }
             }
@@ -205,7 +205,7 @@ pipeline {
                         def statusMessage = sh(script: '''
                                 echo "${statusCheck}" | tr '\n' ' ' | jq ".statusMessage"
                                 ''', returnStdout: true).trim()
-                        echo "Importing ${APP_NAME} failed:  ${statusMessage}"
+                        error "Importing ${APP_NAME} failed:  ${statusMessage}"
                         return false
                     }
                     
