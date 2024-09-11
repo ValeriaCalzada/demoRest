@@ -68,11 +68,12 @@ pipeline {
                 script{
                     try{
                         env.listApplication=sh([script: '''
-                                    curl -H 'dmip-tenant-id: 1' -H "dmip-application-name: ${CLIENT_ID}" \
+                                    listResponse=$(curl -H 'dmip-tenant-id: 1' -H "dmip-application-name: ${CLIENT_ID}" \
                                             -X GET \
                                             -H "Authorization: Bearer $access_token" \
                                             --insecure \
-                                            "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15"
+                                            "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15")
+                                            echo "${listResponse}" |  jq -r ".data" 
                                             ''', returnStdout: true]).trim()
                         println(env.listApplication)
                         def application = env.listApplication.findAll { app ->
