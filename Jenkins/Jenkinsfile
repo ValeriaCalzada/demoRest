@@ -48,8 +48,7 @@ pipeline {
                             if(authResponse == "true")
                                 env.access_token = sh([script: ''' 
                                                     jq -r ".access_token" response.json ''', returnStdout: true]).trim()
-                            //def statusCode = sh([script: ''' echo "${authResponse}" | jq -r ".statusCode" ''', returnStdout: true]).trim()
-                            //println(statusCode)
+
                             else
                                 throw new Exception()
                         }catch(err){
@@ -75,7 +74,6 @@ pipeline {
                                             "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15")
                                             echo "${listResponse}" |  jq -r ".data" 
                                             ''', returnStdout: true]).trim()
-                        
                         if(!env.listApplication.toLowerCase().contains(env.APP_NAME.toLowerCase())){
                             currentBuild.result = 'FAILURE'
                             error("${APP_NAME} was not found as an eligible promotion application")
@@ -127,13 +125,19 @@ pipeline {
                                                     "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export/${appZipUuidTxt}/status"
                                                     ''', returnStdout: true]).trim()
                                 def appZipStatus = sh(script: 'echo "${statusCheck}" | jq -r ".appZipStatus"', returnStdout: true).trim()
-                                if (appZipStatus == "UPLOADED"){
+                                def statusCode=sh([script: '''
+                                        echo "${statusCheck}" | tr '\n' ' ' | jq -r ".statusCode" 
+                                        ''', returnStdout: true]).trim()
+                                if (appZipStatus == "UPLOADED" || statusCode == "200"){
                                     env.zipFileName=sh(script: '''
                                         statusMessage=$(echo "${statusCheck}" | jq -r ".statusMessage") 
                                         echo "${statusMessage}" | grep -oP "'[^']+\\.zip'" | sed "s/'//g" 
                                         ''', returnStdout: true).trim()
                                     return true
                                 }else {
+                                    if(statusCode == "400" || statusCode == "500"){
+                                        throw new Exception()
+                                    }
                                     sleep(15)
                                     return false
                                 }
@@ -188,7 +192,6 @@ pipeline {
                                                     --insecure \
                                                     "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/import/${appZipUuidTxtImport}/status"
                                                     ''', returnStdout: true]).trim()
-                                //def appZipStatus = sh(script: '''echo "${statusCheck}" | tr '\n' ' ' |  jq ".appZipStatus"''', returnStdout: true).trim()
                                 def statusCode=sh([script: '''
                                         echo "${statusCheck}" | tr '\n' ' ' | jq -r ".statusCode" 
                                         ''', returnStdout: true]).trim()
