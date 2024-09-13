@@ -54,7 +54,7 @@ pipeline {
                         }catch(err){
                             currentBuild.result = 'FAILURE'
                             def statusMessage = sh(script: 'cat response.json', returnStdout: true).trim()
-                            error "Retrieving token for ${APP_NAME} failed: ${statusMessage}"
+                            error "Retrieving token for ${app_name} failed: ${statusMessage}"
                         }
                         
                     }
@@ -74,13 +74,13 @@ pipeline {
                                             "https://$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15")
                                             echo "${listResponse}" |  jq -r ".data" 
                                             ''', returnStdout: true]).trim()
-                        if(!env.listApplication.toLowerCase().contains(env.APP_NAME.toLowerCase())){
+                        if(!env.listApplication.toLowerCase().contains(env.app_name.toLowerCase())){
                             currentBuild.result = 'FAILURE'
-                            error("${APP_NAME} was not found as an eligible promotion application")
+                            error("${app_name} was not found as an eligible promotion application")
                         }
                     }catch(err){
                         currentBuild.result = 'FAILURE'
-                        error "Application ${APP_NAME} was not found on the list of elegible applications. List of elegible applications: ${listApplication}"
+                        error "Application ${app_name} was not found on the list of elegible applications. List of elegible applications: ${listApplication}"
                     } 
                 }
             }
@@ -96,7 +96,7 @@ pipeline {
                                             -X POST \
                                             -H "Authorization: Bearer $access_token" -H "Content-Type: application/vnd.fico.dmip.v6.0+json"\
                                             --insecure \
-                                            "https://$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export?application-name=$APP_NAME&destination=trusted-resource&adapter-name=$DMPS_TRUSTED_RESOURCE" \
+                                            "https://$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export?application-name=$app_name&destination=trusted-resource&adapter-name=$DMPS_TRUSTED_RESOURCE" \
                                             ''', returnStdout: true]).trim()
                         env.appZipUuidTxt=sh([script: '''
                                     echo "${exportResponse}" |  jq -r ".appZipUuidTxt" 
@@ -104,7 +104,7 @@ pipeline {
                     }catch(err){
                         currentBuild.result = 'FAILURE'
                         def statusMessage = sh(script: 'echo "${exportResponse}" | tr "\n" " " | jq -r ".errorMessage"', returnStdout: true).trim()
-                        error "Exporting ${APP_NAME} failed:  ${statusMessage}"
+                        error "Exporting ${app_name} failed:  ${statusMessage}"
                     }
                 }
             }
@@ -146,7 +146,7 @@ pipeline {
                     }catch(err){
                         currentBuild.result = 'FAILURE'
                         def statusMessage = sh(script: 'echo "${statusCheck}" | tr "\n" " " | jq -r ".statusMessage"', returnStdout: true).trim()
-                        error "Exporting ${APP_NAME} failed:  ${statusMessage}"
+                        error "Exporting ${app_name} failed:  ${statusMessage}"
                     }
                                        
                 }
@@ -193,7 +193,7 @@ pipeline {
                                                 -H "Authorization: Bearer $access_token" -H "Content-Type: application/vnd.fico.dmip.v6.0+json"\
                                                 -H "git-username: $GIT_USERNAME" -H "git-password: $GIT_TOKEN" \
                                                 --insecure \
-                                                "https://$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/import?application-package-name=${zipFileName}&application-name=${APP_NAME}&source=trusted-resource&adapter-name=$DMPS_TRUSTED_RESOURCE&overwrite-application=$OVERWRITE_APPLICATION&retain-labels=true&auto-job-start=$JOB_AUTOSTART" 
+                                                "https://$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/import?application-package-name=${zipFileName}&application-name=${app_name}&source=trusted-resource&adapter-name=$DMPS_TRUSTED_RESOURCE&overwrite-application=$OVERWRITE_APPLICATION&retain-labels=true&auto-job-start=$job_autostart" 
                                                 ''', returnStdout: true]).trim()
                         env.appZipUuidTxtImport=sh([script: '''
                                         echo "${importResponse}" |  jq -r ".appZipUuidTxt" 
@@ -202,7 +202,7 @@ pipeline {
                     }catch(err){
                         currentBuild.result = 'FAILURE'
                         def statusMessage = sh(script: 'echo "${importResponse}" | tr "\n" " " | jq -r ".errorMessage"', returnStdout: true).trim()
-                        error "Importing ${APP_NAME} failed:  ${statusMessage}"
+                        error "Importing ${app_name} failed:  ${statusMessage}"
                     }   
                 }
             }
@@ -240,7 +240,7 @@ pipeline {
                         def statusMessage = sh(script: '''
                                 echo "${statusCheck}" | tr '\n' ' ' | jq ".statusMessage"
                                 ''', returnStdout: true).trim()
-                        error "Importing ${APP_NAME} failed:  ${statusMessage}"
+                        error "Importing ${app_name} failed:  ${statusMessage}"
                         return false
                     }
                     
