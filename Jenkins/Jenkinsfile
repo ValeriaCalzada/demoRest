@@ -71,7 +71,7 @@ pipeline {
                                             -X GET \
                                             -H "Authorization: Bearer $access_token" \
                                             --insecure \
-                                            "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15")
+                                            "https://$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15")
                                             echo "${listResponse}" |  jq -r ".data" 
                                             ''', returnStdout: true]).trim()
                         if(!env.listApplication.toLowerCase().contains(env.APP_NAME.toLowerCase())){
@@ -96,7 +96,7 @@ pipeline {
                                             -X POST \
                                             -H "Authorization: Bearer $access_token" -H "Content-Type: application/vnd.fico.dmip.v6.0+json"\
                                             --insecure \
-                                            "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export?application-name=$APP_NAME&destination=trusted-resource&adapter-name=$DMPS_TRUSTED_RESOURCE" \
+                                            "https://$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export?application-name=$APP_NAME&destination=trusted-resource&adapter-name=$DMPS_TRUSTED_RESOURCE" \
                                             ''', returnStdout: true]).trim()
                         env.appZipUuidTxt=sh([script: '''
                                     echo "${exportResponse}" |  jq -r ".appZipUuidTxt" 
@@ -122,7 +122,7 @@ pipeline {
                                                     -X GET \
                                                     -H "Authorization: Bearer $access_token" \
                                                     --insecure \
-                                                    "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export/${appZipUuidTxt}/status"
+                                                    "https://$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export/${appZipUuidTxt}/status"
                                                     ''', returnStdout: true]).trim()
                                 def appZipStatus = sh(script: 'echo "${statusCheck}" | jq -r ".appZipStatus"', returnStdout: true).trim()
                                 def statusCode=sh([script: '''
@@ -193,7 +193,7 @@ pipeline {
                                                 -H "Authorization: Bearer $access_token" -H "Content-Type: application/vnd.fico.dmip.v6.0+json"\
                                                 -H "git-username: $GIT_USERNAME" -H "git-password: $GIT_TOKEN" \
                                                 --insecure \
-                                                "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/import?application-package-name=${zipFileName}&application-name=${APP_NAME}&source=trusted-resource&adapter-name=$DMPS_TRUSTED_RESOURCE&overwrite-application=$OVERWRITE_APPLICATION&retain-labels=true&auto-job-start=$JOB_AUTOSTART" 
+                                                "https://$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/import?application-package-name=${zipFileName}&application-name=${APP_NAME}&source=trusted-resource&adapter-name=$DMPS_TRUSTED_RESOURCE&overwrite-application=$OVERWRITE_APPLICATION&retain-labels=true&auto-job-start=$JOB_AUTOSTART" 
                                                 ''', returnStdout: true]).trim()
                         env.appZipUuidTxtImport=sh([script: '''
                                         echo "${importResponse}" |  jq -r ".appZipUuidTxt" 
@@ -219,7 +219,7 @@ pipeline {
                                                     -X GET \
                                                     -H "Authorization: Bearer $access_token" \
                                                     --insecure \
-                                                    "$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/import/${appZipUuidTxtImport}/status"
+                                                    "https://$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/import/${appZipUuidTxtImport}/status"
                                                     ''', returnStdout: true]).trim()
                                 def statusCode=sh([script: '''
                                         echo "${statusCheck}" | tr '\n' ' ' | jq -r ".statusCode" 
