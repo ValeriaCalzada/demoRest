@@ -29,7 +29,7 @@ pipeline {
             }
         }
 
-        stage('Token retrieval') {
+        stage('Get token') {
             steps {
                 withCredentials([string(credentialsId: 'client-secret', variable: 'CLIENT_SECRET')]){
                     script{
@@ -149,6 +149,35 @@ pipeline {
                         error "Exporting ${APP_NAME} failed:  ${statusMessage}"
                     }
                                        
+                }
+            }
+        }
+
+
+        stage('Stop running jobs'){
+            steps{
+                sshagent(credentials : ['ssh-credentials']) {
+                    script {
+                        def list = params.JOB_LIST.split(',')
+                        def parallelTasks = [:]
+                        list.each { job ->
+                        parallelTasks[job] = {
+                            sh """
+                                ssh ec2-user@${INSTANCE_DMPS_URL} java -jar /home/ec2-user/popc/popc.jar job stop -j "${job}" -S HGfHTPag6ZfMpDHyEyGiJh9WIdtwaqw2 --tenantId=2 -v -cf /home/ec2-user/popc/config.yaml || true
+                            """ 
+                            waitUntil{
+                                popcCheck = sh(script: """ssh ec2-user@${INSTANCE_DMPS_URL} java -jar /home/ec2-user/popc/popc.jar job status -j ${job} -S HGfHTPag6ZfMpDHyEyGiJh9WIdtwaqw2 --tenantId=2 -cf /home/ec2-user/popc/config.yaml""", returnStdout: true).trim()
+                                echo """popcCheck: ${popcCheck}"""
+                                job_status=sh(script:""" echo "${popcCheck}" | grep "|" | tail -n 1 | tr -d "| " """, returnStdout: true).trim()
+                                if(job_status == "STOPPED" || job_status == "FINISHED")
+                                    return true
+                                else 
+                                    sleep(10)
+                                    return false
+                            }
+                                               
+                        }}
+                    }
                 }
             }
         }
