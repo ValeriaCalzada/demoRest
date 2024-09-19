@@ -160,6 +160,7 @@ pipeline {
                     script {
                         def list = params.JOB_LIST.split(',')
                         def parallelTasks = [:]
+                        sh "ssh -o StrictHostKeyChecking=accept-new ec2-user@${INSTANCE_DMPS_URL} uptime"
                         list.each { job ->
                         parallelTasks[job] = {
                             sh """
@@ -167,7 +168,7 @@ pipeline {
                             """ 
                             waitUntil{
                                 popcCheck = sh(script: """ssh ec2-user@${INSTANCE_DMPS_URL} java -jar /home/ec2-user/popc/popc.jar job status -j ${job} -S HGfHTPag6ZfMpDHyEyGiJh9WIdtwaqw2 --tenantId=2 -cf /home/ec2-user/popc/config.yaml""", returnStdout: true).trim()
-                                echo """popcCheck: ${popcCheck}"""
+                               // echo """popcCheck: ${popcCheck}"""
                                 job_status=sh(script:""" echo "${popcCheck}" | grep "|" | tail -n 1 | tr -d "| " """, returnStdout: true).trim()
                                 if(job_status == "STOPPED" || job_status == "FINISHED")
                                     return true
