@@ -22,7 +22,7 @@ pipeline {
             steps {
                 script {
                     env.listJobs = params.JOB_LIST.split(',')
-                    sh './scripts/extract-scripts.sh'
+                    sh './Jenkins/scripts/extract-scripts.sh'
                 }
             }
         }
