@@ -22,9 +22,11 @@ pipeline {
             steps {
                 script {
                      sh 'chmod +x ./Jenkins/scripts/*'
-                    env.listJobs = params.JOB_LIST.split(',')
-                    echo "${listJobs}"
-                    sh './Jenkins/scripts/extract-scripts.sh'
+                    def listJobs = params.JOB_LIST.split(',')
+                    listJobs.each { job ->
+                        sh './Jenkins/scripts/extract-scripts.sh'
+                    }
+                    
                 }
             }
         }
