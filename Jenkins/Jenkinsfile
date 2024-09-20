@@ -21,6 +21,7 @@ pipeline {
         stage('Extract scripts') {
             steps {
                 script {
+                     sh 'chmod +x ./Jenkins/scripts/*'
                     env.listJobs = params.JOB_LIST.split(',')
                     sh './Jenkins/scripts/extract-scripts.sh'
                 }
