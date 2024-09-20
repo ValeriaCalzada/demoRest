@@ -18,11 +18,20 @@ pipeline {
             }
         }
 
+        stage('Extract scripts') {
+            steps {
+                script {
+                    env.listJobs = params.JOB_LIST.split(',')
+                    sh 'scripts/extract-scripts.sh'
+                }
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQServer') {
                     sh '''
-                        mvn clean verify sonar:sonar -Dsonar.projectKey=DemoProjectSonarGithub -Dsonar.projectName='DemoProjectSonarGithub' -Dsonar.host.url=http://sonar:9000
+                        mvn clean verify sonar:sonar -Dsonar.projectKey=DemoProjectSonarGithub -Dsonar.projectName='DemoProjectSonarGithub' -Dsonar.host.url=http://sonar:9000 -Dsonar.sources=.
                     '''
                     echo 'SonarQube Analysis Completed'
                 }
