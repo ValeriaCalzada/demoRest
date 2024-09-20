@@ -24,6 +24,7 @@ pipeline {
                      sh 'chmod +x ./Jenkins/scripts/*'
                     def listJobs = params.JOB_LIST.split(',')
                     listJobs.each { job ->
+                    env.shJob = job
                         sh './Jenkins/scripts/extract-scripts.sh'
                     }
                     
