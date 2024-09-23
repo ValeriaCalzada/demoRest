@@ -13,6 +13,6 @@
 
     # Add more extractions as needed
     # For example, extracting some <generated-field> tags:
-    xmlstarlet sel -t -m "//*[local-name()='function-script']" -v . -n "${WORKSPACE}/Jobs/$shJob.xml" > "${WORKSPACE}/Jenkins/scripts/extracted_function-script_from_${shJob}.js"
+    xmlstarlet sel -t -m "//*[local-name()='functionScript']" -v . -n "${WORKSPACE}/Jobs/$shJob.xml" > "${WORKSPACE}/Jenkins/scripts/extracted_function-script_from_${shJob}.js"
 
     set +x
