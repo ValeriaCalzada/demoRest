@@ -39,7 +39,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQServer') {
                     sh '''
-                        mvn sonar:sonar -Dsonar.projectKey=DMPSSonar -Dsonar.projectName='DMPSSonar' -Dsonar.host.url=http://sonar:9000 -Dsonar.inclusions="${WORKSPACE}/*.js, ${WORKSPACE}/*.py" -Dsonar.sources="src,Jenkins/scripts" -Dsonar.language="python, javascript"
+                        mvn sonar:sonar -Dsonar.projectKey=DMPSSonar -Dsonar.projectName='DMPSSonar' -Dsonar.host.url=http://sonar:9000 -Dsonar.sources="src,Jenkins/scripts" -Dsonar.language="python, javascript"
                     '''
                     echo 'SonarQube Analysis Completed'
                 }
