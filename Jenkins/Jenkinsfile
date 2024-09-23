@@ -39,7 +39,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQServer') {
                     sh '''
-                        mvn clean verify sonar:sonar -Dsonar.projectKey=DemoProjectSonarGithub -Dsonar.projectName='DemoProjectSonarGithub' -Dsonar.host.url=http://sonar:9000 -Dsonar.inclusions="${WORKSPACE}/*.js, ${WORKSPACE}/*.py"
+                        mvn clean verify sonar:sonar -Dsonar.projectKey=DemoProjectSonarGithub -Dsonar.projectName='DemoProjectSonarGithub' -Dsonar.host.url=http://sonar:9000 -Dsonar.inclusions="${WORKSPACE}/*.js, ${WORKSPACE}/*.py" -Dsonar.sources="src, ${WORKSPACE}"
                     '''
                     echo 'SonarQube Analysis Completed'
                 }
