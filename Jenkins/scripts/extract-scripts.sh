@@ -24,10 +24,10 @@
 
         local counter=1
         set -x
-        xmlstarlet sel -t -m "//*[local-name()='$tag']" -v . -n "${WORKSPACE}/Jobs/$shJob.xml" |
+        xmlstarlet sel -t -m "//*[local-name()='$tag']/text()" -v . -n "${WORKSPACE}/Jobs/$shJob.xml" |
         while IFS= read -r script_content; do
 
-            script_content=$(echo "$script_content" | sed -e '$d' -e '/^\s*$/d')
+            script_content=$(echo "$script_content" | sed -e '$d' -e '/^\s*$/d' | awk '{gsub(/\n/, " "); print}')
 
             # Check if script_content is not empty
             if [[ -n "$script_content" ]]; then
