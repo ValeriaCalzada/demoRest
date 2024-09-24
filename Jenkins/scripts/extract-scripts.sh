@@ -46,7 +46,7 @@
     }
 
     echo "Processing $shJob..."
-    extract_scripts "inline-scripts" "python_model" "py"
+    extract_scripts "inline-script" "python_model" "py"
     extract_scripts "aggregation-field-or-function-CUSTOM" "custom-function" "js"
     extract_scripts "functionScript" "function-script" "js"
     extract_scripts "custom-function-script" "custom-function-script" "js"
