@@ -1,4 +1,4 @@
-
+#!/bin/bash
 # Loop through each job and run different xmlstarlet commands
 
 
