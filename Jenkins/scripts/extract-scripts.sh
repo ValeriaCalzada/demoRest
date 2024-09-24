@@ -26,9 +26,20 @@
         set -x
         xmlstarlet sel -t -m "//*[local-name()='$tag']" -v . -n "${WORKSPACE}/Jobs/$shJob.xml" |
         while IFS= read -r script_content; do
-            script_file="${WORKSPACE}/Jenkins/scripts/${file_prefix}_script_from_${shJob}_${counter}.${file_extension}"
-            echo "$script_content" > "$script_file"
-            counter=$((counter+1))
+
+            script_content=$(echo "$script_content" | sed -e '$d' -e '/^\s*$/d')
+
+            # Check if script_content is not empty
+            if [[ -n "$script_content" ]]; then
+                script_file="${WORKSPACE}/Jenkins/scripts/${file_prefix}_script_from_${shJob}_${counter}.${file_extension}"
+                echo "$script_content" > "$script_file"
+                counter=$((counter+1))
+            fi
+
+
+            #script_file="${WORKSPACE}/Jenkins/scripts/${file_prefix}_script_from_${shJob}_${counter}.${file_extension}"
+            #echo "$script_content" > "$script_file"
+            #counter=$((counter+1))
         done
         # < <(xmlstarlet sel -t -m "//*[local-name()='$tag']" -v . -n "${WORKSPACE}/Jobs/$shJob.xml" | tr '\0' '\n')
         set +x
