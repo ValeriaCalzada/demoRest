@@ -25,7 +25,7 @@
         local counter=1
         set -x
         xmlstarlet sel -t -m "//*[local-name()='$tag']" -v . -n "${WORKSPACE}/Jobs/$shJob.xml" |
-        while IFS= read -r -d '' script_content; do
+        while IFS= read -r script_content; do
             script_file="${WORKSPACE}/Jenkins/scripts/${file_prefix}_script_from_${shJob}.${file_extension}"
             echo "$script_content" > "$script_file"
             counter=$((counter+1))
