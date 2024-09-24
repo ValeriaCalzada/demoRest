@@ -26,7 +26,7 @@
         set -x
         xmlstarlet sel -t -m "//*[local-name()='$tag']" -v . -n "${WORKSPACE}/Jobs/$shJob.xml" |
         while IFS= read -r script_content; do
-            script_file="${WORKSPACE}/Jenkins/scripts/${file_prefix}_script_from_${shJob}.${file_extension}"
+            script_file="${WORKSPACE}/Jenkins/scripts/${file_prefix}_script_from_${shJob}_${counter}.${file_extension}"
             echo "$script_content" > "$script_file"
             counter=$((counter+1))
         done
@@ -35,7 +35,7 @@
     }
 
     echo "Processing $shJob..."
-    extract_scripts "inline-scripts" "python_model" ".py"
-    extract_scripts "aggregation-field-or-function-CUSTOM" "custom-function" ".js"
-    extract_scripts "functionScript" "function-script" ".js"
-    extract_scripts "custom-function-script" "custom-function-script" ".js"
+    extract_scripts "inline-scripts" "python_model" "py"
+    extract_scripts "aggregation-field-or-function-CUSTOM" "custom-function" "js"
+    extract_scripts "functionScript" "function-script" "js"
+    extract_scripts "custom-function-script" "custom-function-script" "js"
