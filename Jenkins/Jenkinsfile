@@ -7,11 +7,11 @@ pipeline {
 
     stages {
 
-        stage('Git Checkout') {
-            steps {
-                checkout scmGit(
-                        branches: [[name: '*/master']],
-                        extensions: [],
+       /// stage('Git Checkout') {
+          //  steps {
+            //    checkout scmGit(
+              //          branches: [[name: '*/master']],
+                /*        extensions: [],
                         userRemoteConfigs: [[url: "https://github.com/ValeriaCalzada/demoRest.git"]]
                         )
                     echo 'Git Checkout Completed'
@@ -45,7 +45,7 @@ pipeline {
                 }
                 
             }
-        }
+        }*/
 
         stage('Get token') {
             steps {
