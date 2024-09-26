@@ -47,7 +47,7 @@ pipeline {
             }
         }*/
 
-        stage('Get token') {
+        stage('Get token in origin environment') {
             steps {
                 withCredentials([string(credentialsId: 'client-secret', variable: 'CLIENT_SECRET')]){
                     script{
@@ -59,7 +59,7 @@ pipeline {
                                                 -u "${CLIENT_ID}:${CLIENT_SECRET}" \
                                                 -d "$bodyAuth" \
                                                 --insecure \
-                                                "$TOKEN_URL")
+                                                "$ORIGIN_TOKEN_URL")
                                         echo "${responseAuth}" > response.json
                                         jq 'has("access_token")' response.json 
                                         ''', returnStdout: true]).trim()
@@ -89,7 +89,7 @@ pipeline {
                                             -X GET \
                                             -H "Authorization: Bearer $access_token" \
                                             --insecure \
-                                            "https://$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15")
+                                            "https://$INSTANCE_DMPS_ORIGIN_URL:31443/dmip-gw/dmip/api/application/promotion-eligible?offset=1&limit=15")
                                             echo "${listResponse}" |  jq -r ".data" 
                                             ''', returnStdout: true]).trim()
                         if(!env.listApplication.toLowerCase().contains(env.app_name.toLowerCase())){
@@ -114,7 +114,7 @@ pipeline {
                                             -X POST \
                                             -H "Authorization: Bearer $access_token" -H "Content-Type: application/vnd.fico.dmip.v6.0+json"\
                                             --insecure \
-                                            "https://$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export?application-name=$app_name&destination=trusted-resource&adapter-name=$DMPS_TRUSTED_RESOURCE" \
+                                            "https://$INSTANCE_DMPS_ORIGIN_URL:31443/dmip-gw/dmip/api/application/export?application-name=$app_name&destination=trusted-resource&adapter-name=$DMPS_TRUSTED_RESOURCE" \
                                             ''', returnStdout: true]).trim()
                         env.appZipUuidTxt=sh([script: '''
                                     echo "${exportResponse}" |  jq -r ".appZipUuidTxt" 
@@ -140,7 +140,7 @@ pipeline {
                                                     -X GET \
                                                     -H "Authorization: Bearer $access_token" \
                                                     --insecure \
-                                                    "https://$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/export/${appZipUuidTxt}/status"
+                                                    "https://$INSTANCE_DMPS_ORIGIN_URL:31443/dmip-gw/dmip/api/application/export/${appZipUuidTxt}/status"
                                                     ''', returnStdout: true]).trim()
                                 def appZipStatus = sh(script: 'echo "${statusCheck}" | jq -r ".appZipStatus"', returnStdout: true).trim()
                                 def statusCode=sh([script: '''
@@ -178,14 +178,14 @@ pipeline {
                     script {
                         def list = params.JOB_LIST.split(',')
                         def parallelTasks = [:]
-                        sh "ssh -o StrictHostKeyChecking=accept-new ec2-user@${INSTANCE_DMPS_URL} uptime"
+                        sh "ssh -o StrictHostKeyChecking=accept-new ec2-user@${INSTANCE_DMPS_DESTINATION_URL} uptime"
                         list.each { job ->
                         parallelTasks[job] = {
                             sh """
-                                ssh ec2-user@${INSTANCE_DMPS_URL} java -jar /home/ec2-user/popc/popc.jar job stop -j "${job}" -S HGfHTPag6ZfMpDHyEyGiJh9WIdtwaqw2 --tenantId=2 -v -cf /home/ec2-user/popc/config.yaml || true
+                                ssh ec2-user@${INSTANCE_DMPS_DESTINATION_URL} java -jar /home/ec2-user/popc/popc.jar job stop -j "${job}" -S HGfHTPag6ZfMpDHyEyGiJh9WIdtwaqw2 --tenantId=2 -v -cf /home/ec2-user/popc/config.yaml || true
                             """ 
                             waitUntil{
-                                popcCheck = sh(script: """ssh ec2-user@${INSTANCE_DMPS_URL} java -jar /home/ec2-user/popc/popc.jar job status -j ${job} -S HGfHTPag6ZfMpDHyEyGiJh9WIdtwaqw2 --tenantId=2 -cf /home/ec2-user/popc/config.yaml""", returnStdout: true).trim()
+                                popcCheck = sh(script: """ssh ec2-user@${INSTANCE_DMPS_DESTINATION_URL} java -jar /home/ec2-user/popc/popc.jar job status -j ${job} -S HGfHTPag6ZfMpDHyEyGiJh9WIdtwaqw2 --tenantId=2 -cf /home/ec2-user/popc/config.yaml""", returnStdout: true).trim()
                                 job_status=sh(script:""" echo "${popcCheck}" | grep "|" | tail -n 1 | tr -d "| " """, returnStdout: true).trim()
                                 if(job_status == "CONFIGURED" || job_status == "FINISHED")
                                     return true
@@ -196,6 +196,39 @@ pipeline {
                                                
                         }}
                         parallel parallelTasks
+                    }
+                }
+            }
+        }
+
+        stage('Get token in destination environment') {
+            steps {
+                withCredentials([string(credentialsId: 'client-secret', variable: 'CLIENT_SECRET')]){
+                    script{
+                        try{
+                            env.authResponse=sh([script: '''
+                                        bodyAuth="grant_type=client_credentials"
+                                        responseAuth=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
+                                                -X POST \
+                                                -u "${CLIENT_ID}:${CLIENT_SECRET}" \
+                                                -d "$bodyAuth" \
+                                                --insecure \
+                                                "$DESTINATION_TOKEN_URL")
+                                        echo "${responseAuth}" > response.json
+                                        jq 'has("access_token")' response.json 
+                                        ''', returnStdout: true]).trim()
+                            if(authResponse == "true")
+                                env.access_token = sh([script: ''' 
+                                                    jq -r ".access_token" response.json ''', returnStdout: true]).trim()
+
+                            else
+                                throw new Exception()
+                        }catch(err){
+                            currentBuild.result = 'FAILURE'
+                            def statusMessage = sh(script: 'cat response.json', returnStdout: true).trim()
+                            error "Retrieving token for ${app_name} failed: ${statusMessage}"
+                        }
+                        
                     }
                 }
             }
@@ -212,7 +245,7 @@ pipeline {
                                                 -H "Authorization: Bearer $access_token" -H "Content-Type: application/vnd.fico.dmip.v6.0+json"\
                                                 -H "git-username: $GIT_USERNAME" -H "git-password: $GIT_TOKEN" \
                                                 --insecure \
-                                                "https://$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/import?application-package-name=${zipFileName}&application-name=${app_name}&source=trusted-resource&adapter-name=$DMPS_TRUSTED_RESOURCE&overwrite-application=$OVERWRITE_APPLICATION&retain-labels=true&auto-job-start=$job_autostart" 
+                                                "https://$INSTANCE_DMPS_DESTINATION_URL:31443/dmip-gw/dmip/api/application/import?application-package-name=${zipFileName}&application-name=${app_name}&source=trusted-resource&adapter-name=$DMPS_TRUSTED_RESOURCE&overwrite-application=$OVERWRITE_APPLICATION&retain-labels=true&auto-job-start=$job_autostart" 
                                                 ''', returnStdout: true]).trim()
                         env.appZipUuidTxtImport=sh([script: '''
                                         echo "${importResponse}" |  jq -r ".appZipUuidTxt" 
@@ -238,7 +271,7 @@ pipeline {
                                                     -X GET \
                                                     -H "Authorization: Bearer $access_token" \
                                                     --insecure \
-                                                    "https://$INSTANCE_DMPS_URL:31443/dmip-gw/dmip/api/application/import/${appZipUuidTxtImport}/status"
+                                                    "https://$INSTANCE_DMPS_DESTINATION_URL:31443/dmip-gw/dmip/api/application/import/${appZipUuidTxtImport}/status"
                                                     ''', returnStdout: true]).trim()
                                 def statusCode=sh([script: '''
                                         echo "${statusCheck}" | tr '\n' ' ' | jq -r ".statusCode" 
