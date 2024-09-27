@@ -240,7 +240,7 @@ pipeline {
                     try{
                         withCredentials([usernamePassword(credentialsId: 'github-dmps-credentials', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME'), string(credentialsId:'github-dmps-token', variable:'GIT_TOKEN')]){
                         env.importResponse=sh([script: '''
-                                    curl -H 'dmip-tenant-id: 2' -H "dmip-application-name: ${CLIENT_ID}" \
+                                    curl -H 'dmip-tenant-id: 1' -H "dmip-application-name: ${CLIENT_ID}" \
                                                 -X POST \
                                                 -H "Authorization: Bearer $access_token" -H "Content-Type: application/vnd.fico.dmip.v6.0+json"\
                                                 -H "git-username: $GIT_USERNAME" -H "git-password: $GIT_TOKEN" \
