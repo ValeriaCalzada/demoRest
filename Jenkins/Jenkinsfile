@@ -172,7 +172,7 @@ pipeline {
         }
 
 
-        stage('Stop running jobs'){
+        /*stage('Stop running jobs'){
             steps{
                 sshagent(credentials : ['ssh-credentials']) {
                     script {
@@ -199,7 +199,7 @@ pipeline {
                     }
                 }
             }
-        }
+        }*/
 
         stage('Get token in destination environment') {
             steps {
