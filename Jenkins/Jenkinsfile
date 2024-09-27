@@ -203,14 +203,14 @@ pipeline {
 
         stage('Get token in destination environment') {
             steps {
-                withCredentials([string(credentialsId: 'client-secret', variable: 'CLIENT_SECRET')]){
+                withCredentials([string(credentialsId: 'client-secret-destination', variable: 'CLIENT_SECRET_DESTINATION')]){
                     script{
                         try{
                             env.authResponse=sh([script: '''
                                         bodyAuth="grant_type=client_credentials"
                                         responseAuth=$(curl -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Charset: UTF-8" \
                                                 -X POST \
-                                                -u "${CLIENT_ID}:${CLIENT_SECRET}" \
+                                                -u "${CLIENT_ID}:${CLIENT_SECRET_DESTINATION}" \
                                                 -d "$bodyAuth" \
                                                 --insecure \
                                                 "$DESTINATION_TOKEN_URL")
