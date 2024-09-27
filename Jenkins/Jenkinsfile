@@ -183,10 +183,10 @@ pipeline {
                             list.each { job ->
                             parallelTasks[job] = {
                                 sh """
-                                    ssh ec2-user@${INSTANCE_DMPS_DESTINATION_URL} java -jar /home/ec2-user/popc/popc.jar job stop -j "${job}" -S ${CLIENT_SECRET_DESTINATION} --tenantId=1 -v -cf /home/ec2-user/popc/config.yaml || true
+                                    ssh ec2-user@${INSTANCE_DMPS_DESTINATION_URL} java -jar /home/ec2-user/popc-6.2.2/popc.jar job stop -j "${job}" -S ${CLIENT_SECRET_DESTINATION} --tenantId=1 -v -cf /home/ec2-user/popc-6.2.2/config.yaml || true
                                 """ 
                                 waitUntil{
-                                    popcCheck = sh(script: """ssh ec2-user@${INSTANCE_DMPS_DESTINATION_URL} java -jar /home/ec2-user/popc/popc.jar job status -j ${job} -S ${CLIENT_SECRET_DESTINATION} --tenantId=1 -cf /home/ec2-user/popc/config.yaml""", returnStdout: true).trim()
+                                    popcCheck = sh(script: """ssh ec2-user@${INSTANCE_DMPS_DESTINATION_URL} java -jar /home/ec2-user/popc-6.2.2/popc.jar job status -j ${job} -S ${CLIENT_SECRET_DESTINATION} --tenantId=1 -cf /home/ec2-user/popc-6.2.2/config.yaml""", returnStdout: true).trim()
                                     job_status=sh(script:""" echo "${popcCheck}" | grep "|" | tail -n 1 | tr -d "| " """, returnStdout: true).trim()
                                     if(job_status == "CONFIGURED" || job_status == "FINISHED")
                                         return true
